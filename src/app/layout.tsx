@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Alen Smith - Photographer",
+  title: "Alens - Photographer",
   description: "Professional photographer specializing in fine art and documentary photography",
 };
 

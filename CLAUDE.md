@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is Alen Smith's Photography Portfolio built with Next.js 16, featuring a minimal, clean design that showcases photographic work through an auto-rotating image carousel. The site uses App Router architecture with React 19 and Tailwind CSS v4 for styling.
+This is Alens Photography Portfolio built with Next.js 16, featuring a minimal, clean design that showcases photographic work through an auto-rotating image carousel. The site uses App Router architecture with React 19 and Tailwind CSS v4 for styling.
 
 ## Tech Stack
 
@@ -126,4 +126,4 @@ src/
 - Static portfolio site with client-side interactivity
 - Images in `public/` directory are SVGs used for branding/illustrations
 - Portfolio images loaded from Unsplash CDN
-- Site metadata: "Alen Smith - Photographer" specializing in fine art and documentary photography
+- Site metadata: "Alens - Photographer" specializing in fine art and documentary photography
