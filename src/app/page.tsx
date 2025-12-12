@@ -5,34 +5,141 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const [currentImage, setCurrentImage] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState('home');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-    portfolio: true,
+    portfolio: false,
     works: false
   });
 
-  // 摄影师作品集图片
-  const images = [
-    {
-      src: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=2000&q=85",
-      alt: "Urban Architecture Photography"
-    },
-    {
-      src: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=2000&q=85",
-      alt: "Desert Landscape"
-    },
-    {
-      src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2000&q=85",
-      alt: "Mountain Range at Sunset"
-    },
-    {
-      src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2000&q=85",
-      alt: "Arctic Wilderness"
-    },
-    {
-      src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2000&q=85",
-      alt: "Ocean Waves"
-    }
-  ];
+  // 摄影师作品集图片 - 按分类组织
+  const categoryImages = {
+    home: [
+      {
+        src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2000&q=85",
+        alt: "Featured Work 1"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2000&q=85",
+        alt: "Featured Work 2"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2000&q=85",
+        alt: "Featured Work 3"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=2000&q=85",
+        alt: "Featured Work 4"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=2000&q=85",
+        alt: "Featured Work 5"
+      }
+    ],
+    'portfolio-architecture': [
+      {
+        src: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=2000&q=85",
+        alt: "Urban Architecture Photography"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=2000&q=85",
+        alt: "Modern Building Architecture"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?w=2000&q=85",
+        alt: "Architectural Detail"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=2000&q=85",
+        alt: "Contemporary Structure"
+      }
+    ],
+    'portfolio-landscape': [
+      {
+        src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2000&q=85",
+        alt: "Mountain Landscape"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2000&q=85",
+        alt: "Valley View"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2000&q=85",
+        alt: "Coastal Scenery"
+      }
+    ],
+    'portfolio-portrait': [
+      {
+        src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=2000&q=85",
+        alt: "Portrait Series 1"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=2000&q=85",
+        alt: "Portrait Series 2"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=2000&q=85",
+        alt: "Portrait Series 3"
+      }
+    ],
+    'portfolio-street': [
+      {
+        src: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=2000&q=85",
+        alt: "Street Photography 1"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=2000&q=85",
+        alt: "Street Photography 2"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=2000&q=85",
+        alt: "Street Photography 3"
+      }
+    ],
+    'works-urban': [
+      {
+        src: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=2000&q=85",
+        alt: "Urban Perspectives 1"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=2000&q=85",
+        alt: "Urban Perspectives 2"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=2000&q=85",
+        alt: "Urban Perspectives 3"
+      }
+    ],
+    'works-nature': [
+      {
+        src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2000&q=85",
+        alt: "Nature's Light 1"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=2000&q=85",
+        alt: "Nature's Light 2"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2000&q=85",
+        alt: "Nature's Light 3"
+      }
+    ],
+    'works-human': [
+      {
+        src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=2000&q=85",
+        alt: "Human Stories 1"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=2000&q=85",
+        alt: "Human Stories 2"
+      },
+      {
+        src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=2000&q=85",
+        alt: "Human Stories 3"
+      }
+    ]
+  };
+
+  const images = categoryImages[selectedCategory as keyof typeof categoryImages] || categoryImages.home;
 
   // 自动轮播
   useEffect(() => {
@@ -53,6 +160,11 @@ export default function Home() {
 
   const goToSlide = (index: number) => {
     setCurrentImage(index);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentImage(0); // 重置到第一张图片
   };
 
   const toggleCategory = (category: string) => {
@@ -110,12 +222,16 @@ export default function Home() {
         <nav className="flex-1">
           <ul className="space-y-6">
             <li>
-              <a
-                href="#"
-                className="text-black font-bold text-[13px] uppercase tracking-[0.15em] hover:opacity-60 transition-opacity"
+              <button
+                onClick={() => handleCategorySelect('home')}
+                className={`text-left transition-colors ${
+                  selectedCategory === 'home'
+                    ? 'text-black font-bold text-[13px] uppercase tracking-[0.15em]'
+                    : 'text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black'
+                }`}
               >
                 HOME
-              </a>
+              </button>
             </li>
 
             {/* PORTFOLIO - 可折叠 */}
@@ -150,24 +266,52 @@ export default function Home() {
               >
                 <ul className="ml-4 space-y-2 pl-3 border-l border-gray-200">
                   <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
+                    <button
+                      onClick={() => handleCategorySelect('portfolio-architecture')}
+                      className={`text-left transition-colors ${
+                        selectedCategory === 'portfolio-architecture'
+                          ? 'text-black font-bold text-[10px] uppercase tracking-[0.12em]'
+                          : 'text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black'
+                      } block py-1 w-full`}
+                    >
                       Architecture
-                    </a>
+                    </button>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
+                    <button
+                      onClick={() => handleCategorySelect('portfolio-landscape')}
+                      className={`text-left transition-colors ${
+                        selectedCategory === 'portfolio-landscape'
+                          ? 'text-black font-bold text-[10px] uppercase tracking-[0.12em]'
+                          : 'text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black'
+                      } block py-1 w-full`}
+                    >
                       Landscape
-                    </a>
+                    </button>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
+                    <button
+                      onClick={() => handleCategorySelect('portfolio-portrait')}
+                      className={`text-left transition-colors ${
+                        selectedCategory === 'portfolio-portrait'
+                          ? 'text-black font-bold text-[10px] uppercase tracking-[0.12em]'
+                          : 'text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black'
+                      } block py-1 w-full`}
+                    >
                       Portrait
-                    </a>
+                    </button>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
+                    <button
+                      onClick={() => handleCategorySelect('portfolio-street')}
+                      className={`text-left transition-colors ${
+                        selectedCategory === 'portfolio-street'
+                          ? 'text-black font-bold text-[10px] uppercase tracking-[0.12em]'
+                          : 'text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black'
+                      } block py-1 w-full`}
+                    >
                       Street Photography
-                    </a>
+                    </button>
                   </li>
                 </ul>
               </div>
@@ -214,19 +358,40 @@ export default function Home() {
               >
                 <ul className="ml-4 space-y-2 pl-3 border-l border-gray-200">
                   <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
+                    <button
+                      onClick={() => handleCategorySelect('works-urban')}
+                      className={`text-left transition-colors ${
+                        selectedCategory === 'works-urban'
+                          ? 'text-black font-bold text-[10px] uppercase tracking-[0.12em]'
+                          : 'text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black'
+                      } block py-1 w-full`}
+                    >
                       Urban Perspectives
-                    </a>
+                    </button>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
+                    <button
+                      onClick={() => handleCategorySelect('works-nature')}
+                      className={`text-left transition-colors ${
+                        selectedCategory === 'works-nature'
+                          ? 'text-black font-bold text-[10px] uppercase tracking-[0.12em]'
+                          : 'text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black'
+                      } block py-1 w-full`}
+                    >
                       Nature's Light
-                    </a>
+                    </button>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
+                    <button
+                      onClick={() => handleCategorySelect('works-human')}
+                      className={`text-left transition-colors ${
+                        selectedCategory === 'works-human'
+                          ? 'text-black font-bold text-[10px] uppercase tracking-[0.12em]'
+                          : 'text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black'
+                      } block py-1 w-full`}
+                    >
                       Human Stories
-                    </a>
+                    </button>
                   </li>
                 </ul>
               </div>
