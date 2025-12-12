@@ -7,8 +7,7 @@ export default function Home() {
   const [currentImage, setCurrentImage] = useState(0);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     portfolio: true,
-    books: false,
-    exhibitions: false
+    works: false
   });
 
   // 摄影师作品集图片
@@ -183,19 +182,19 @@ export default function Home() {
               </a>
             </li>
 
-            {/* BOOKS - 可折叠 */}
+            {/* WORKS - 可折叠 */}
             <li className="space-y-2">
               <button
-                onClick={() => toggleCategory('books')}
+                onClick={() => toggleCategory('works')}
                 className="w-full flex items-center justify-between text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black transition-colors group"
               >
-                <span>BOOKS</span>
+                <span>WORKS</span>
                 <svg
                   width="12"
                   height="12"
                   viewBox="0 0 12 12"
                   fill="none"
-                  className={`transition-transform duration-300 ${expandedCategories.books ? 'rotate-90' : ''}`}
+                  className={`transition-transform duration-300 ${expandedCategories.works ? 'rotate-90' : ''}`}
                 >
                   <path
                     d="M4 2L8 6L4 10"
@@ -208,7 +207,7 @@ export default function Home() {
               </button>
               <div
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  expandedCategories.books
+                  expandedCategories.works
                     ? 'max-h-48 opacity-100 translate-y-0'
                     : 'max-h-0 opacity-0 -translate-y-2'
                 }`}
@@ -227,56 +226,6 @@ export default function Home() {
                   <li>
                     <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
                       Human Stories
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </li>
-
-            {/* EXHIBITIONS - 可折叠 */}
-            <li className="space-y-2">
-              <button
-                onClick={() => toggleCategory('exhibitions')}
-                className="w-full flex items-center justify-between text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black transition-colors group"
-              >
-                <span>EXHIBITIONS</span>
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  className={`transition-transform duration-300 ${expandedCategories.exhibitions ? 'rotate-90' : ''}`}
-                >
-                  <path
-                    d="M4 2L8 6L4 10"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  expandedCategories.exhibitions
-                    ? 'max-h-48 opacity-100 translate-y-0'
-                    : 'max-h-0 opacity-0 -translate-y-2'
-                }`}
-              >
-                <ul className="ml-4 space-y-2 pl-3 border-l border-gray-200">
-                  <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
-                      Solo Shows
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
-                      Group Exhibitions
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black transition-colors block py-1">
-                      Upcoming Events
                     </a>
                   </li>
                 </ul>
