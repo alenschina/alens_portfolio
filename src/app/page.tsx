@@ -235,7 +235,7 @@ export default function Home() {
             </li>
 
             {/* PORTFOLIO - 可折叠 */}
-            <li className="space-y-2">
+            <li>
               <button
                 onClick={() => toggleCategory('portfolio')}
                 className="w-full flex items-center justify-between text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black transition-colors group"
@@ -317,17 +317,8 @@ export default function Home() {
               </div>
             </li>
 
-            <li>
-              <a
-                href="#"
-                className="text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black transition-colors block"
-              >
-                ABOUT
-              </a>
-            </li>
-
             {/* WORKS - 可折叠 */}
-            <li className="space-y-2">
+            <li>
               <button
                 onClick={() => toggleCategory('works')}
                 className="w-full flex items-center justify-between text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black transition-colors group"
@@ -395,6 +386,15 @@ export default function Home() {
                   </li>
                 </ul>
               </div>
+            </li>
+
+            <li>
+              <a
+                href="#"
+                className="text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black transition-colors block"
+              >
+                ABOUT
+              </a>
             </li>
 
             <li>
