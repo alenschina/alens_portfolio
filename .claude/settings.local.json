@@ -9,7 +9,8 @@
       "Bash(npx:*)",
       "Bash(node --loader tsx:*)",
       "Bash(node:*)",
-      "Bash(npm uninstall @prisma/client prisma)"
+      "Bash(npm uninstall @prisma/client prisma)",
+      "Bash(curl:*)"
     ]
   }
 }
