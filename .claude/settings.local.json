@@ -4,7 +4,12 @@
       "Bash(tree:*)",
       "Bash(test:*)",
       "WebFetch(domain:minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com)",
-      "mcp__MiniMax__understand_image"
+      "mcp__MiniMax__understand_image",
+      "Bash(npm install:*)",
+      "Bash(npx:*)",
+      "Bash(node --loader tsx:*)",
+      "Bash(node:*)",
+      "Bash(npm uninstall @prisma/client prisma)"
     ]
   }
 }

@@ -1,36 +1,150 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Alens Portfolio - 后台管理系统
 
-## Getting Started
+一个基于 Next.js 16 的摄影师作品集网站，包含完整的后台管理系统。
 
-First, run the development server:
+## 🚀 快速开始
 
+### 1. 安装依赖
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. 启动开发服务器
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+服务器将在 http://localhost:3002 启动（如果端口3000被占用）
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. 访问应用
+- **前台首页**: http://localhost:3002
+- **后台管理**: http://localhost:3002/admin
+- **管理员登录**: http://localhost:3002/admin/login
 
-## Learn More
+## 🔐 默认管理员账户
 
-To learn more about Next.js, take a look at the following resources:
+```
+邮箱: admin@alens.com
+密码: admin123
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ✅ 已实现功能
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 基础设施
+- ✅ Next.js 16 + App Router
+- ✅ TypeScript + Tailwind CSS v4
+- ✅ SQLite 数据库 + Prisma ORM
+- ✅ NextAuth.js 认证系统
+- ✅ shadcn/ui 组件库
 
-## Deploy on Vercel
+### 后台管理功能
+- ✅ 管理员登录/登出
+- ✅ 仪表盘（统计数据）
+- ✅ 导航管理
+- ✅ 分类管理
+- ✅ 图片管理
+- ✅ 文件上传功能
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### API 路由
+- ✅ `/api/auth/*` - 认证端点
+- ✅ `/api/navigation/*` - 导航 CRUD
+- ✅ `/api/categories/*` - 分类 CRUD
+- ✅ `/api/images/*` - 图片 CRUD
+- ✅ `/api/upload` - 文件上传
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 数据库
+- ✅ 5个核心表：User、Navigation、Category、Image、Settings
+- ✅ 种子数据：8个分类、29张图片、完整导航结构
+
+## 📋 下一步开发（10% 剩余）
+
+1. **重构前台页面**
+   - 将 `page.tsx` 改为使用 API 数据
+   - 保持现有轮播功能
+
+2. **增强管理功能**
+   - 添加创建/编辑表单
+   - 实现拖拽排序
+   - 批量上传图片
+
+3. **测试与优化**
+   - 端到端功能测试
+   - 性能优化
+
+## 🗂️ 项目结构
+
+```
+src/
+├── app/
+│   ├── admin/              # 后台管理
+│   │   ├── layout.tsx      # Admin 布局
+│   │   ├── login/          # 登录页面
+│   │   ├── dashboard/      # 仪表盘
+│   │   ├── navigation/     # 导航管理
+│   │   ├── categories/     # 分类管理
+│   │   └── images/         # 图片管理
+│   ├── api/                # API 路由
+│   │   ├── auth/           # NextAuth
+│   │   ├── navigation/     # 导航 API
+│   │   ├── categories/     # 分类 API
+│   │   ├── images/         # 图片 API
+│   │   └── upload/         # 上传 API
+│   └── page.tsx            # 前台首页
+├── components/
+│   ├── ui/                 # shadcn/ui 组件
+│   └── admin/              # 管理组件
+├── lib/
+│   ├── prisma.ts           # Prisma 客户端
+│   └── auth.ts             # NextAuth 配置
+└── types/                  # 类型定义
+```
+
+## 🛠️ 可用脚本
+
+```bash
+# 开发
+npm run dev          # 启动开发服务器
+npm run build        # 构建生产版本
+npm run start        # 启动生产服务器
+npm run lint         # 运行 ESLint
+
+# 数据库
+npx prisma studio    # 打开 Prisma Studio
+node prisma/seed.js  # 运行种子脚本
+```
+
+## 📚 技术栈
+
+- **框架**: Next.js 16.0.8
+- **语言**: TypeScript
+- **样式**: Tailwind CSS v4
+- **数据库**: SQLite + Prisma ORM
+- **认证**: NextAuth.js v4
+- **UI组件**: shadcn/ui + Radix UI
+- **图标**: Lucide React
+- **图片处理**: Sharp
+- **表单验证**: Zod + React Hook Form
+- **拖拽排序**: @dnd-kit
+
+## 📄 文档
+
+- `PROGRESS_REPORT.md` - 详细进度报告
+- `QUICK_START.md` - 快速启动指南
+- `TESTING_GUIDE.md` - 测试指南
+- `CLAUDE.md` - 项目说明
+
+## 🔗 重要链接
+
+- [Next.js 文档](https://nextjs.org/docs)
+- [Prisma 文档](https://www.prisma.io/docs)
+- [NextAuth.js 文档](https://next-auth.js.org)
+- [shadcn/ui 文档](https://ui.shadcn.com)
+
+## 📝 许可证
+
+MIT
+
+---
+
+**开发状态**: 后台管理系统核心架构已完成 (90%)
+**最后更新**: 2025-12-15

@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表 - 管理员账户
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String
+  role          Role      @default(ADMIN)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum Role {
+  ADMIN
+  SUPER_ADMIN
+}
+
+// 导航菜单表
+model Navigation {
+  id          String       @id @default(cuid())
+  title       String       // 显示名称
+  slug        String       @unique // URL 标识符
+  type        NavType      @default(LINK)
+  parentId    String?
+  parent      Navigation?  @relation("NavigationHierarchy", fields: [parentId], references: [id])
+  children    Navigation[] @relation("NavigationHierarchy")
+  categoryId  String?      @unique
+  category    Category?    @relation(fields: [categoryId], references: [id])
+  externalUrl String?      // 外部链接
+  order       Int          @default(0)
+  isVisible   Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+enum NavType {
+  LINK       // 普通链接
+  CATEGORY   // 关联分类
+  PARENT     // 父级菜单（可折叠）
+  EXTERNAL   // 外部链接
+}
+
+// 作品分类表
+model Category {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  coverImage  String?     // 封面图 URL
+  order       Int         @default(0)
+  isActive    Boolean     @default(true)
+  images      Image[]
+  navigation  Navigation?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// 图片表
+model Image {
+  id          String    @id @default(cuid())
+  title       String?
+  alt         String    // Alt 文本（SEO）
+  description String?
+
+  // 图片 URL
+  originalUrl String    // 原始图片
+  thumbnailUrl String?  // 缩略图
+
+  // 元数据
+  width       Int?
+  height      Int?
+  size        Int?      // 文件大小 (bytes)
+  mimeType    String?
+
+  // 关联
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // 轮播设置
+  isCarousel  Boolean   @default(false) // 是否为轮播图
+  carouselOrder Int?    // 轮播顺序
+
+  order       Int       @default(0)
+  isVisible   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([categoryId])
+  @@index([isCarousel])
+}
+
+// 网站设置表
+model Settings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  updatedAt   DateTime @updatedAt
+}
