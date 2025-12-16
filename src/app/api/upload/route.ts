@@ -15,10 +15,9 @@ export async function POST(request: Request) {
 
     const formData = await request.formData()
     const file = formData.get('file') as File
-    const categoryId = formData.get('categoryId') as string
 
-    if (!file || !categoryId) {
-      return NextResponse.json({ error: 'Missing file or categoryId' }, { status: 400 })
+    if (!file) {
+      return NextResponse.json({ error: 'Missing file' }, { status: 400 })
     }
 
     // 创建上传目录
@@ -51,13 +50,12 @@ export async function POST(request: Request) {
     const metadata = await sharp(buffer).metadata()
 
     return NextResponse.json({
-      originalUrl: `/uploads/${filename}`,
+      url: `/uploads/${filename}`,
       thumbnailUrl: `/uploads/thumb-${filename}`,
       width: metadata.width,
       height: metadata.height,
       size: buffer.length,
       mimeType: file.type,
-      categoryId
     })
   } catch (error) {
     console.error('Error uploading file:', error)
