@@ -11,16 +11,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
+import type { Category, Image } from '@/types'
 
-interface Category {
-  id: string
-  name: string
-  slug: string
-  description?: string
-  order: number
-  isActive: boolean
-  images: any[]
-}
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -159,7 +151,7 @@ export default function CategoriesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-500">
-                      {category.images.length} images
+                      {category.images?.length ?? 0} images
                     </span>
                     <Button variant="outline" size="sm" onClick={() => handleEdit(category)}>
                       <Pencil className="w-4 h-4" />
@@ -287,9 +279,9 @@ export default function CategoriesPage() {
           </DialogHeader>
           <p className="py-4">
             Are you sure you want to delete "{deletingCategory?.name}"? This action cannot be undone.
-            {deletingCategory && deletingCategory.images.length > 0 && (
+            {(deletingCategory?.images?.length ?? 0) > 0 && (
               <span className="block mt-2 text-red-600 font-semibold">
-                Warning: This category has {deletingCategory.images.length} images.
+                Warning: This category has {(deletingCategory?.images?.length ?? 0)} images.
               </span>
             )}
           </p>

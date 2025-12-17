@@ -11,18 +11,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
+import type { NavigationItem, Category, NavigationType } from '@/types'
+import { assertNavigationType } from '@/types/guards'
 
-interface NavigationItem {
-  id: string
-  title: string
-  slug: string
-  type: string
-  order: number
-  isVisible: boolean
-  parentId?: string | null
-  categoryId?: string | null
-  children?: NavigationItem[]
-}
 
 const navigationSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -38,7 +29,7 @@ type NavigationFormData = z.infer<typeof navigationSchema>
 
 export default function NavigationPage() {
   const [navigation, setNavigation] = useState<NavigationItem[]>([])
-  const [categories, setCategories] = useState<any[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<NavigationItem | null>(null)
@@ -114,7 +105,7 @@ export default function NavigationPage() {
     setEditingItem(item)
     setValue('title', item.title)
     setValue('slug', item.slug)
-    setValue('type', item.type as any)
+    setValue('type', assertNavigationType(item.type))
     setValue('order', item.order)
     setValue('isVisible', item.isVisible)
     setValue('parentId', item.parentId || null)
@@ -270,7 +261,7 @@ export default function NavigationPage() {
                 <Label htmlFor="type">Type</Label>
                 <Select
                   value={selectedType}
-                  onValueChange={(value) => setValue('type', value as any)}
+                  onValueChange={(value) => setValue('type', assertNavigationType(value))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />

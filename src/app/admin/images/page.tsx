@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Plus, Pencil, Trash2, Upload } from 'lucide-react'
+import type { UploadedFileData } from '@/types'
 
 interface Image {
   id: string
@@ -64,7 +65,7 @@ export default function ImagesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingImage, setDeletingImage] = useState<Image | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [uploadedImageData, setUploadedImageData] = useState<any>(null)
+  const [uploadedImageData, setUploadedImageData] = useState<UploadedFileData | null>(null)
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ImageFormData>({
     resolver: zodResolver(imageSchema),
