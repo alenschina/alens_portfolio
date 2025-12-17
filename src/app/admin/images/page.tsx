@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -24,11 +24,13 @@ interface Image {
   height?: number
   size?: number
   mimeType?: string
-  categoryId: string
-  category: { name: string }
-  isCarousel: boolean
-  carouselOrder?: number
-  order: number
+  categories: {
+    id: string
+    category: { id: string; name: string }
+    isCarousel: boolean
+    carouselOrder?: number
+    order: number
+  }[]
   isVisible: boolean
 }
 
@@ -42,10 +44,12 @@ const imageSchema = z.object({
   title: z.string().optional(),
   alt: z.string().min(1, 'Alt text is required'),
   description: z.string().optional(),
-  categoryId: z.string().min(1, 'Category is required'),
-  isCarousel: z.boolean(),
-  carouselOrder: z.number().int().min(0).optional().nullable(),
-  order: z.number().int().min(0),
+  categories: z.array(z.object({
+    categoryId: z.string().min(1, 'Category is required'),
+    isCarousel: z.boolean(),
+    carouselOrder: z.number().int().min(0).optional().nullable(),
+    order: z.number().int().min(0)
+  })).min(1, 'At least one category is required'),
   isVisible: z.boolean(),
 })
 
@@ -60,17 +64,17 @@ export default function ImagesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingImage, setDeletingImage] = useState<Image | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadedImageData, setUploadedImageData] = useState<any>(null)
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ImageFormData>({
     resolver: zodResolver(imageSchema),
     defaultValues: {
-      order: 0,
       isVisible: true,
-      isCarousel: false,
+      categories: []
     }
   })
 
-  const isCarousel = watch('isCarousel')
+  const watchedCategories = watch('categories')
 
   useEffect(() => {
     fetchImages()
@@ -106,16 +110,30 @@ export default function ImagesPage() {
         : '/api/images'
       const method = editingImage ? 'PUT' : 'POST'
 
+      // For new images, include the uploaded image data
+      const payload = editingImage
+        ? data
+        : {
+            ...data,
+            originalUrl: uploadedImageData?.url,
+            thumbnailUrl: uploadedImageData?.thumbnailUrl,
+            width: uploadedImageData?.width,
+            height: uploadedImageData?.height,
+            size: uploadedImageData?.size,
+            mimeType: uploadedImageData?.mimeType
+          }
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       })
 
       if (res.ok) {
         await fetchImages()
         setDialogOpen(false)
         setEditingImage(null)
+        setUploadedImageData(null)
         reset()
       } else {
         alert('Failed to save image')
@@ -143,14 +161,7 @@ export default function ImagesPage() {
       if (res.ok) {
         const imageData = await res.json()
         setValue('alt', imageData.alt || 'Uploaded image')
-        setValue('originalUrl', imageData.url)
-        if (imageData.thumbnailUrl) {
-          setValue('thumbnailUrl', imageData.thumbnailUrl)
-        }
-        setValue('width', imageData.width)
-        setValue('height', imageData.height)
-        setValue('size', imageData.size)
-        setValue('mimeType', imageData.mimeType)
+        setUploadedImageData(imageData)
       } else {
         alert('Failed to upload image')
       }
@@ -167,11 +178,13 @@ export default function ImagesPage() {
     setValue('title', image.title || '')
     setValue('alt', image.alt)
     setValue('description', image.description || '')
-    setValue('categoryId', image.categoryId)
-    setValue('isCarousel', image.isCarousel)
-    setValue('carouselOrder', image.carouselOrder || 0)
-    setValue('order', image.order)
     setValue('isVisible', image.isVisible)
+    setValue('categories', image.categories.map(ci => ({
+      categoryId: ci.category.id,
+      isCarousel: ci.isCarousel,
+      carouselOrder: ci.carouselOrder || 0,
+      order: ci.order
+    })))
     setDialogOpen(true)
   }
 
@@ -198,12 +211,41 @@ export default function ImagesPage() {
 
   const handleAddNew = () => {
     setEditingImage(null)
+    setUploadedImageData(null)
     reset({
-      order: images.length,
       isVisible: true,
-      isCarousel: false,
+      categories: []
     })
     setDialogOpen(true)
+  }
+
+  const handleCategoryToggle = (categoryId: string, checked: boolean) => {
+    const currentCategories = watchedCategories || []
+
+    if (checked) {
+      if (!currentCategories.find(c => c.categoryId === categoryId)) {
+        setValue('categories', [
+          ...currentCategories,
+          {
+            categoryId,
+            isCarousel: false,
+            carouselOrder: 0,
+            order: currentCategories.length
+          }
+        ])
+      }
+    } else {
+      setValue('categories', currentCategories.filter(c => c.categoryId !== categoryId))
+    }
+  }
+
+  const updateCategoryCarousel = (categoryId: string, isCarousel: boolean, carouselOrder?: number) => {
+    const currentCategories = watchedCategories || []
+    setValue('categories', currentCategories.map(c =>
+      c.categoryId === categoryId
+        ? { ...c, isCarousel, carouselOrder: isCarousel ? (carouselOrder || 0) : null }
+        : c
+    ))
   }
 
   return (
@@ -251,18 +293,15 @@ export default function ImagesPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-gray-600 mb-2">
-                  <strong>Category:</strong> {image.category?.name}
+                  <strong>Categories:</strong> {image.categories.map(c => c.category.name).join(', ')}
                 </p>
                 {image.description && (
                   <p className="text-xs text-gray-600 mb-2">
                     <strong>Description:</strong> {image.description}
                   </p>
                 )}
-                <p className="text-xs text-gray-600 mb-2">
-                  <strong>Order:</strong> {image.order}
-                </p>
                 <div className="flex gap-2 text-xs flex-wrap">
-                  {image.isCarousel && (
+                  {image.categories.some(c => c.isCarousel) && (
                     <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">
                       Carousel
                     </span>
@@ -283,7 +322,6 @@ export default function ImagesPage() {
         )}
       </div>
 
-      {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -340,72 +378,65 @@ export default function ImagesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="categoryId">Category *</Label>
-              <Select
-                value={watch('categoryId')}
-                onValueChange={(value) => setValue('categoryId', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.categoryId && (
-                <p className="text-sm text-red-600">{errors.categoryId.message}</p>
+              <Label>Categories *</Label>
+              <div className="grid grid-cols-2 gap-2 border rounded-md p-4 max-h-60 overflow-y-auto">
+                {categories.map((cat) => {
+                  const isChecked = watchedCategories?.some(c => c.categoryId === cat.id) || false
+                  const categoryData = watchedCategories?.find(c => c.categoryId === cat.id)
+
+                  return (
+                    <div key={cat.id} className="space-y-2 p-2 border rounded">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`cat-${cat.id}`}
+                          checked={isChecked}
+                          onCheckedChange={(checked) =>
+                            handleCategoryToggle(cat.id, checked as boolean)
+                          }
+                        />
+                        <Label htmlFor={`cat-${cat.id}`}>{cat.name}</Label>
+                      </div>
+
+                      {isChecked && (
+                        <div className="ml-6 space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`carousel-${cat.id}`}
+                              checked={categoryData?.isCarousel || false}
+                              onCheckedChange={(checked) =>
+                                updateCategoryCarousel(cat.id, checked as boolean, categoryData?.order)
+                              }
+                            />
+                            <Label htmlFor={`carousel-${cat.id}`}>Carousel</Label>
+                          </div>
+                          {categoryData?.isCarousel && (
+                            <Input
+                              type="number"
+                              placeholder="Carousel Order"
+                              value={categoryData.carouselOrder || 0}
+                              onChange={(e) =>
+                                updateCategoryCarousel(cat.id, true, parseInt(e.target.value))
+                              }
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              {errors.categories && (
+                <p className="text-sm text-red-600">{errors.categories.message}</p>
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="order">Order</Label>
-                <Input
-                  id="order"
-                  type="number"
-                  {...register('order', { valueAsNumber: true })}
-                />
-                {errors.order && (
-                  <p className="text-sm text-red-600">{errors.order.message}</p>
-                )}
-              </div>
-
-              <div className="flex items-center space-x-2 pt-6">
-                <input
-                  type="checkbox"
-                  id="isCarousel"
-                  {...register('isCarousel')}
-                  className="rounded"
-                />
-                <Label htmlFor="isCarousel">Carousel</Label>
-              </div>
-
-              <div className="flex items-center space-x-2 pt-6">
-                <input
-                  type="checkbox"
-                  id="isVisible"
-                  {...register('isVisible')}
-                  className="rounded"
-                />
-                <Label htmlFor="isVisible">Visible</Label>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isVisible"
+                {...register('isVisible')}
+              />
+              <Label htmlFor="isVisible">Visible</Label>
             </div>
-
-            {isCarousel && (
-              <div className="space-y-2">
-                <Label htmlFor="carouselOrder">Carousel Order</Label>
-                <Input
-                  id="carouselOrder"
-                  type="number"
-                  {...register('carouselOrder', { valueAsNumber: true })}
-                  placeholder="0"
-                />
-              </div>
-            )}
 
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
@@ -419,7 +450,6 @@ export default function ImagesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>

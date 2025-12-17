@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createImageSchema } from '@/schemas/image'
-import { z } from 'zod'
+import { z, ZodError } from 'zod'
 
 export async function GET() {
   try {
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
     return NextResponse.json(image, { status: 201 })
   } catch (error) {
     console.error('Error creating image:', error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: error.errors }, { status: 400 })
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: 'Invalid data', details: error.issues }, { status: 400 })
     }
     return NextResponse.json({ error: 'Failed to create image' }, { status: 500 })
   }

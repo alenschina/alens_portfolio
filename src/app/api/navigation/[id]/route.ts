@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { z } from 'zod'
+import { z, ZodError } from 'zod'
 
 const navigationSchema = z.object({
   title: z.string().min(1),
@@ -66,8 +66,8 @@ export async function PUT(
     return NextResponse.json(navigation)
   } catch (error) {
     console.error('Error updating navigation:', error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: error.errors }, { status: 400 })
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: 'Invalid data', details: error.issues }, { status: 400 })
     }
     return NextResponse.json({ error: 'Failed to update navigation' }, { status: 500 })
   }

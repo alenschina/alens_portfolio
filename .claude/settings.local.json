@@ -10,7 +10,9 @@
       "Bash(node --loader tsx:*)",
       "Bash(node:*)",
       "Bash(npm uninstall @prisma/client prisma)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "Bash(npm run build)"
     ]
   }
 }

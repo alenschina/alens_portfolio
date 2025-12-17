@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { z } from 'zod'
+import { z, ZodError } from 'zod'
 
 const categorySchema = z.object({
   name: z.string().min(1),
@@ -67,8 +67,8 @@ export async function POST(request: Request) {
     return NextResponse.json(category, { status: 201 })
   } catch (error) {
     console.error('Error creating category:', error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: error.errors }, { status: 400 })
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: 'Invalid data', details: error.issues }, { status: 400 })
     }
     return NextResponse.json({ error: 'Failed to create category' }, { status: 500 })
   }
