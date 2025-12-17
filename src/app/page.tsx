@@ -166,7 +166,7 @@ export default function Home() {
         </div>
 
         {/* 导航菜单 */}
-        <nav className="flex-1">
+        <nav className="flex-1 font-sans">
           <ul className="space-y-6">
             {navigation.map((item) => {
               if (item.type === 'CATEGORY') {
