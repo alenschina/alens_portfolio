@@ -223,26 +223,59 @@ async function main() {
   }
 
   // 为每个分类导入图片
+  // 首先收集所有唯一的图片，避免重复创建
+  const allImagesMap = new Map()
+
+  for (const [slug, images] of Object.entries(imageData)) {
+    for (const img of images) {
+      const key = `${img.src}-${img.alt}`
+      if (!allImagesMap.has(key)) {
+        allImagesMap.set(key, img)
+      }
+    }
+  }
+
+  // 创建所有唯一的图片
+  console.log('创建图片记录...')
+  const createdImages = []
+  for (const [key, img] of allImagesMap) {
+    const image = await prisma.image.create({
+      data: {
+        alt: img.alt,
+        originalUrl: img.src
+      }
+    })
+    createdImages.push({ key, image, alt: img.alt, src: img.src })
+  }
+  console.log(`创建了 ${createdImages.length} 张唯一图片`)
+
+  // 为每个分类创建图片关联
   for (const [slug, images] of Object.entries(imageData)) {
     const category = await prisma.category.findUnique({
       where: { slug }
     })
 
     if (category) {
+      let carouselIndex = 0
       for (let i = 0; i < images.length; i++) {
         const img = images[i]
-        await prisma.image.create({
-          data: {
-            alt: img.alt,
-            originalUrl: img.src,
-            categoryId: category.id,
-            order: i,
-            isCarousel: slug === 'home', // 只有首页图片设为轮播图
-            carouselOrder: slug === 'home' ? i : null
-          }
-        })
+        const key = `${img.src}-${img.alt}`
+
+        // 找到对应的图片记录
+        const imageRecord = createdImages.find(item => item.key === key)
+        if (imageRecord) {
+          await prisma.categoryImage.create({
+            data: {
+              imageId: imageRecord.image.id,
+              categoryId: category.id,
+              order: i,
+              isCarousel: slug === 'home', // 只有首页分类的图片设为轮播图
+              carouselOrder: slug === 'home' ? carouselIndex++ : null
+            }
+          })
+        }
       }
-      console.log(`分类 ${slug} 导入了 ${images.length} 张图片`)
+      console.log(`分类 ${slug} 关联了 ${images.length} 张图片`)
     }
   }
 

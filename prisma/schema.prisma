@@ -53,50 +53,69 @@ enum NavType {
 
 // 作品分类表
 model Category {
-  id          String      @id @default(cuid())
-  name        String
-  slug        String      @unique
-  description String?
-  coverImage  String?     // 封面图 URL
-  order       Int         @default(0)
-  isActive    Boolean     @default(true)
-  images      Image[]
-  navigation  Navigation?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id              String          @id @default(cuid())
+  name            String
+  slug            String          @unique
+  description     String?
+  coverImage      String?         // 封面图 URL
+  order           Int             @default(0)
+  isActive        Boolean         @default(true)
+  images          CategoryImage[]
+  navigation      Navigation?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 // 图片表
 model Image {
-  id          String    @id @default(cuid())
-  title       String?
-  alt         String    // Alt 文本（SEO）
-  description String?
+  id            String          @id @default(cuid())
+  title         String?
+  alt           String          // Alt 文本（SEO）
+  description   String?
 
   // 图片 URL
-  originalUrl String    // 原始图片
-  thumbnailUrl String?  // 缩略图
+  originalUrl   String          // 原始图片
+  thumbnailUrl  String?         // 缩略图
 
   // 元数据
-  width       Int?
-  height      Int?
-  size        Int?      // 文件大小 (bytes)
-  mimeType    String?
+  width         Int?
+  height        Int?
+  size          Int?            // 文件大小 (bytes)
+  mimeType      String?
 
   // 关联
-  categoryId  String
-  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categories    CategoryImage[]
 
-  // 轮播设置
-  isCarousel  Boolean   @default(false) // 是否为轮播图
-  carouselOrder Int?    // 轮播顺序
+  order         Int             @default(0)
+  isVisible     Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
-  order       Int       @default(0)
-  isVisible   Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  @@index([isVisible])
+}
 
+// 分类-图片关联表 (多对多关系)
+model CategoryImage {
+  id              String    @id @default(cuid())
+  imageId         String
+  categoryId      String
+
+  // 轮播设置 (每个category中的独立设置)
+  isCarousel      Boolean   @default(false)
+  carouselOrder   Int?
+
+  order           Int       @default(0)
+
+  // 关联
+  image           Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  category        Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([imageId, categoryId])
   @@index([categoryId])
+  @@index([imageId])
   @@index([isCarousel])
 }
 

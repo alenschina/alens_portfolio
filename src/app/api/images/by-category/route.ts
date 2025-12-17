@@ -14,8 +14,10 @@ export async function GET(request: Request) {
       where: { slug },
       include: {
         images: {
-          where: { isVisible: true },
-          orderBy: { order: 'asc' }
+          orderBy: { order: 'asc' },
+          include: {
+            image: true
+          }
         }
       }
     })
@@ -24,7 +26,20 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 })
     }
 
-    return NextResponse.json(category.images)
+    // Filter images where the image itself is visible
+    const visibleImages = category.images.filter(ci => ci.image.isVisible)
+
+    // Transform the data to include image details directly
+    const images = visibleImages.map(ci => ({
+      ...ci.image,
+      categoryImage: {
+        isCarousel: ci.isCarousel,
+        carouselOrder: ci.carouselOrder,
+        order: ci.order
+      }
+    }))
+
+    return NextResponse.json(images)
   } catch (error) {
     console.error('Error fetching category images:', error)
     return NextResponse.json({ error: 'Failed to fetch images' }, { status: 500 })

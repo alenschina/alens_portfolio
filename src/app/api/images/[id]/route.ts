@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { updateImageSchema } from '@/schemas/image'
+import { z } from 'zod'
 
 export async function GET(
   request: Request,
@@ -12,7 +13,13 @@ export async function GET(
     const { id } = await params
     const image = await prisma.image.findUnique({
       where: { id },
-      include: { category: true }
+      include: {
+        categories: {
+          include: {
+            category: true
+          }
+        }
+      }
     })
 
     if (!image) {
@@ -40,9 +47,41 @@ export async function PUT(
     const body = await request.json()
     const validatedData = updateImageSchema.parse(body)
 
+    // Extract categories data if present
+    const { categories, ...imageData } = validatedData
+
+    // If categories are being updated, we need to delete old ones and create new ones
+    const updateData: any = { ...imageData }
+    
+    if (categories !== undefined) {
+      // Delete all existing category associations
+      await prisma.categoryImage.deleteMany({
+        where: { imageId: id }
+      })
+      
+      // Create new category associations
+      if (categories.length > 0) {
+        updateData.categories = {
+          create: categories.map(cat => ({
+            categoryId: cat.categoryId,
+            isCarousel: cat.isCarousel,
+            carouselOrder: cat.carouselOrder,
+            order: cat.order
+          }))
+        }
+      }
+    }
+
     const image = await prisma.image.update({
       where: { id },
-      data: validatedData
+      data: updateData,
+      include: {
+        categories: {
+          include: {
+            category: true
+          }
+        }
+      }
     })
 
     return NextResponse.json(image)

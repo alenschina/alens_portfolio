@@ -23,8 +23,10 @@ export async function GET(
       where: { id: categoryId },
       include: {
         images: {
-          where: { isVisible: true },
-          orderBy: { order: 'asc' }
+          orderBy: { order: 'asc' },
+          include: {
+            image: true
+          }
         },
         navigation: true
       }
@@ -34,7 +36,22 @@ export async function GET(
       return NextResponse.json({ error: 'Category not found' }, { status: 404 })
     }
 
-    return NextResponse.json(category)
+    // Filter images where the image itself is visible
+    const transformedCategory = {
+      ...category,
+      images: category.images
+        .filter(ci => ci.image.isVisible)
+        .map(ci => ({
+          ...ci.image,
+          categoryImage: {
+            isCarousel: ci.isCarousel,
+            carouselOrder: ci.carouselOrder,
+            order: ci.order
+          }
+        }))
+    }
+
+    return NextResponse.json(transformedCategory)
   } catch (error) {
     console.error('Error fetching category:', error)
     return NextResponse.json({ error: 'Failed to fetch category' }, { status: 500 })

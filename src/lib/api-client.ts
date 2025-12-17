@@ -28,9 +28,11 @@ export interface Image {
   height?: number
   size?: number
   mimeType?: string
-  categoryId: string
-  isCarousel: boolean
-  carouselOrder?: number | null
+  categoryImage?: {
+    isCarousel: boolean
+    carouselOrder?: number | null
+    order: number
+  }
   order: number
   isVisible: boolean
 }

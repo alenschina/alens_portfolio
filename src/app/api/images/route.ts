@@ -3,16 +3,31 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createImageSchema } from '@/schemas/image'
+import { z } from 'zod'
 
 export async function GET() {
   try {
     const images = await prisma.image.findMany({
       include: {
-        category: true
+        categories: {
+          include: {
+            category: true
+          }
+        }
       },
-      orderBy: { order: 'asc' }
+      orderBy: { createdAt: 'desc' }
     })
-    return NextResponse.json(images)
+
+    // Transform the data to include categories in a more convenient format
+    const transformedImages = images.map(image => ({
+      ...image,
+      categories: image.categories.map(ci => ({
+        ...ci,
+        category: ci.category
+      }))
+    }))
+
+    return NextResponse.json(transformedImages)
   } catch (error) {
     console.error('Error fetching images:', error)
     return NextResponse.json({ error: 'Failed to fetch images' }, { status: 500 })
@@ -29,8 +44,28 @@ export async function POST(request: Request) {
     const body = await request.json()
     const validatedData = createImageSchema.parse(body)
 
+    // Extract categories data and remove it from the main image data
+    const { categories, ...imageData } = validatedData
+
     const image = await prisma.image.create({
-      data: validatedData
+      data: {
+        ...imageData,
+        categories: categories ? {
+          create: categories.map(cat => ({
+            categoryId: cat.categoryId,
+            isCarousel: cat.isCarousel,
+            carouselOrder: cat.carouselOrder,
+            order: cat.order
+          }))
+        } : undefined
+      },
+      include: {
+        categories: {
+          include: {
+            category: true
+          }
+        }
+      }
     })
 
     return NextResponse.json(image, { status: 201 })
