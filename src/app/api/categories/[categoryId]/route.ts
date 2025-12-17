@@ -15,11 +15,12 @@ const categorySchema = z.object({
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ categoryId: string }> }
 ) {
   try {
+    const { categoryId } = await params
     const category = await prisma.category.findUnique({
-      where: { id: params.id },
+      where: { id: categoryId },
       include: {
         images: {
           where: { isVisible: true },
@@ -42,7 +43,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ categoryId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -50,11 +51,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { categoryId } = await params
     const body = await request.json()
     const validatedData = categorySchema.parse(body)
 
     const category = await prisma.category.update({
-      where: { id: params.id },
+      where: { id: categoryId },
       data: validatedData
     })
 
@@ -70,7 +72,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ categoryId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -78,8 +80,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { categoryId } = await params
+
     await prisma.category.delete({
-      where: { id: params.id }
+      where: { id: categoryId }
     })
 
     return NextResponse.json({ success: true })

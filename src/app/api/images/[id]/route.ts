@@ -2,32 +2,16 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { z } from 'zod'
-
-const imageSchema = z.object({
-  title: z.string().optional(),
-  alt: z.string().min(1),
-  description: z.string().optional(),
-  originalUrl: z.string().url(),
-  thumbnailUrl: z.string().url().optional(),
-  width: z.number().int().optional(),
-  height: z.number().int().optional(),
-  size: z.number().int().optional(),
-  mimeType: z.string().optional(),
-  categoryId: z.string().min(1),
-  isCarousel: z.boolean().optional(),
-  carouselOrder: z.number().int().optional().nullable(),
-  order: z.number().int().nonnegative(),
-  isVisible: z.boolean()
-})
+import { updateImageSchema } from '@/schemas/image'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const image = await prisma.image.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { category: true }
     })
 
@@ -44,7 +28,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -52,11 +36,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const body = await request.json()
-    const validatedData = imageSchema.parse(body)
+    const validatedData = updateImageSchema.parse(body)
 
     const image = await prisma.image.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData
     })
 
@@ -72,7 +57,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -80,8 +65,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
+
     await prisma.image.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ success: true })
