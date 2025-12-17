@@ -216,7 +216,7 @@ export default function Home() {
                           : 'max-h-0 opacity-0 -translate-y-2'
                       }`}
                     >
-                      <ul className="ml-4 space-y-2 pl-3 border-l border-gray-200">
+                      <ul className="ml-4 mt-3 space-y-2 pl-3 border-l border-gray-200">
                         {item.children.map((child) => (
                           <li key={child.id}>
                             <button
@@ -277,82 +277,113 @@ export default function Home() {
       </aside>
 
       {/* 右侧作品展示区域 */}
-      <main className="flex-1 relative w-[70%] flex items-center justify-center p-12 lg:p-20">
-        <div className="w-full h-[60vh] lg:h-[calc(100vh-6rem)] relative overflow-hidden flex items-center justify-center">
-          {/* 幻灯片图片 */}
-          <div className="relative w-full h-full">
-            {images.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                No images found
-              </div>
-            ) : (
-              images.map((image, index) => (
-                <div
+      <main className="flex-1 relative w-[70%] flex flex-col p-12 lg:p-20">
+        {/* 轮播图区域 */}
+        <div className="relative w-full flex-1 flex items-center justify-center min-h-[60vh] lg:min-h-[calc(100vh-12rem)]">
+          <div className="relative w-full h-[60vh] lg:h-full relative overflow-hidden flex items-center justify-center">
+            {/* 幻灯片图片 */}
+            <div className="relative w-full h-full">
+              {images.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  No images found
+                </div>
+              ) : (
+                images.map((image, index) => (
+                  <div
+                    key={image.id}
+                    className={`absolute inset-0 transition-opacity duration-1000 flex items-center justify-center ${
+                      index === currentImage ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    <Image
+                      src={image.originalUrl}
+                      alt={image.alt}
+                      width={1200}
+                      height={800}
+                      unoptimized
+                      className="max-w-full max-h-full object-contain"
+                      priority={index === currentImage}
+                    />
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* 左侧切换按钮 - 仅非首页显示 */}
+            {selectedCategory !== 'home' && images.length > 1 && (
+              <button
+                onClick={goToPrevious}
+                className="absolute left-6 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors group"
+                aria-label="Previous image"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="group-hover:stroke-gray-200"
+                >
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+            )}
+
+            {/* 右侧切换按钮 - 仅非首页显示 */}
+            {selectedCategory !== 'home' && images.length > 1 && (
+              <button
+                onClick={goToNext}
+                className="absolute right-6 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors group"
+                aria-label="Next image"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="group-hover:stroke-gray-200"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 缩略图列表 - 仅在非首页显示 */}
+        {selectedCategory !== 'home' && images.length > 0 && (
+          <div className="mt-8 border-t border-gray-200 pt-8">
+            <div className="flex gap-3 overflow-x-auto pb-4">
+              {images.map((image, index) => (
+                <button
                   key={image.id}
-                  className={`absolute inset-0 transition-opacity duration-1000 flex items-center justify-center ${
-                    index === currentImage ? "opacity-100" : "opacity-0"
+                  onClick={() => goToSlide(index)}
+                  className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${
+                    index === currentImage
+                      ? 'opacity-100'
+                      : 'opacity-60 hover:opacity-80'
                   }`}
                 >
                   <Image
-                    src={image.originalUrl}
+                    src={image.thumbnailUrl || image.originalUrl}
                     alt={image.alt}
-                    width={1200}
-                    height={800}
+                    width={80}
+                    height={80}
                     unoptimized
-                    className="max-w-full max-h-full object-contain"
-                    priority={index === currentImage}
+                    className="w-full h-full object-cover"
                   />
-                </div>
-              ))
-            )}
+                </button>
+              ))}
+            </div>
           </div>
-
-          {/* 左侧切换按钮 */}
-          {images.length > 1 && (
-            <button
-              onClick={goToPrevious}
-              className="absolute left-6 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors group"
-              aria-label="Previous image"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="group-hover:stroke-gray-200"
-              >
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-          )}
-
-          {/* 右侧切换按钮 */}
-          {images.length > 1 && (
-            <button
-              onClick={goToNext}
-              className="absolute right-6 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors group"
-              aria-label="Next image"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="group-hover:stroke-gray-200"
-              >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-          )}
-        </div>
+        )}
       </main>
     </div>
   );
