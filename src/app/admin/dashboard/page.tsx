@@ -1,81 +1,32 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useEffect, useState } from 'react'
-
-interface Stats {
-  categories: number
-  images: number
-  navigation: number
-}
+import { StatsCard } from '@/components/admin/StatsCard'
+import { useDashboardStats } from '@/hooks/useApi'
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<Stats>({
-    categories: 0,
-    images: 0,
-    navigation: 0
-  })
-  const [loading, setLoading] = useState(true)
+  const { stats, isLoading, isError } = useDashboardStats()
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [categoriesRes, imagesRes, navigationRes] = await Promise.all([
-          fetch('/api/categories'),
-          fetch('/api/images'),
-          fetch('/api/navigation')
-        ])
-
-        const categories = await categoriesRes.json()
-        const images = await imagesRes.json()
-        const navigation = await navigationRes.json()
-
-        setStats({
-          categories: categories.length,
-          images: images.length,
-          navigation: navigation.length
-        })
-      } catch (error) {
-        console.error('Error fetching stats:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchStats()
-  }, [])
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <p className="text-red-500">Error loading dashboard data</p>
+      </div>
+    )
+  }
 
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Categories</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold">{loading ? '...' : stats.categories}</p>
-          </CardContent>
-        </Card>
+        <StatsCard title="Categories" value={stats.totalCategories} loading={isLoading} />
+        <StatsCard title="Images" value={stats.totalImages} loading={isLoading} />
+        <StatsCard title="Navigation Items" value={stats.totalNavigationItems} loading={isLoading} />
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Images</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold">{loading ? '...' : stats.images}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Navigation Items</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold">{loading ? '...' : stats.navigation}</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <StatsCard title="Visible Images" value={stats.visibleImages} loading={isLoading} />
+        <StatsCard title="Carousel Images" value={stats.carouselImages} loading={isLoading} />
       </div>
     </div>
   )

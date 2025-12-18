@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { fetchNavigation, fetchImagesByCategory, type NavigationItem, type Image as ImageType } from "@/lib/api-client";
+import { useNavigation, useImagesByCategory } from "@/hooks/useApi";
 
 export default function Home() {
   const [currentImage, setCurrentImage] = useState(0);
@@ -12,50 +12,12 @@ export default function Home() {
     works: false
   });
 
-  // 数据状态
-  const [navigation, setNavigation] = useState<NavigationItem[]>([]);
-  const [images, setImages] = useState<ImageType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use SWR hooks for data fetching with caching
+  const { navigation, isLoading: navLoading, isError: navError } = useNavigation();
+  const { images, isLoading: imagesLoading, isError: imagesError } = useImagesByCategory(selectedCategory);
 
-  // 加载导航数据
-  useEffect(() => {
-    const loadNavigation = async () => {
-      try {
-        const navData = await fetchNavigation();
-        setNavigation(navData);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to load navigation:', err);
-        setError('Failed to load navigation');
-      }
-    };
-
-    loadNavigation();
-  }, []);
-
-  // 加载图片数据
-  useEffect(() => {
-    const loadImages = async () => {
-      if (!selectedCategory) return;
-
-      try {
-        setLoading(true);
-        const imageData = await fetchImagesByCategory(selectedCategory);
-        setImages(imageData);
-        setCurrentImage(0); // 切换分类时重置到第一张
-        setError(null);
-      } catch (err) {
-        console.error('Failed to load images:', err);
-        setError('Failed to load images');
-        setImages([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadImages();
-  }, [selectedCategory]);
+  const loading = navLoading || imagesLoading;
+  const error = navError || imagesError;
 
   // 自动轮播
   useEffect(() => {

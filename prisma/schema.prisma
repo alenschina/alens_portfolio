@@ -42,6 +42,12 @@ model Navigation {
   isVisible   Boolean      @default(true)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+  // Performance indexes
+  @@index([parentId])
+  @@index([order])
+  @@index([isVisible])
+  @@index([type])
 }
 
 enum NavType {
@@ -64,6 +70,10 @@ model Category {
   navigation      Navigation?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+
+  // Performance indexes
+  @@index([order])
+  @@index([isActive])
 }
 
 // 图片表
@@ -91,7 +101,11 @@ model Image {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
+  // Performance indexes
   @@index([isVisible])
+  @@index([order])
+  @@index([createdAt])
+  @@index([mimeType])
 }
 
 // 分类-图片关联表 (多对多关系)
@@ -113,10 +127,16 @@ model CategoryImage {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  // Composite indexes for common queries
   @@unique([imageId, categoryId])
   @@index([categoryId])
   @@index([imageId])
   @@index([isCarousel])
+  @@index([order])
+  @@index([carouselOrder])
+
+  // Composite index for carousel queries
+  @@index([categoryId, isCarousel])
 }
 
 // 网站设置表
