@@ -41,3 +41,71 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# ====================
+# Project-specific ignores
+# ====================
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+prisma/dev.db
+prisma/migrations/*/migration.sql
+
+# Claude Code local settings
+.claude/
+claude.settings.local.json
+
+# Analysis and documentation files
+project-structure-analysis.md
+type-testing-analysis.md
+*.analysis.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary folders
+tmp/
+temp/
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output/
+
+# Build artifacts
+dist/
+build/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Hardenv files
+.hardenv
+
+# Local development files
+*.local.*
