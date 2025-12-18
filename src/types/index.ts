@@ -230,6 +230,7 @@ export interface UseCrudReturn<T> {
   createItem: (data: Partial<T>) => Promise<void>
   updateItem: (id: string, data: Partial<T>) => Promise<void>
   deleteItem: (id: string) => Promise<void>
+  getItem: (id: string) => Promise<T>
 }
 
 // Statistics Types
