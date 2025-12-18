@@ -12,13 +12,16 @@ datasource db {
 
 // 用户表 - 管理员账户
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String      @id @default(cuid())
+  email         String      @unique
   name          String?
   passwordHash  String
-  role          Role      @default(ADMIN)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          Role        @default(ADMIN)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  auditLogs     AuditLog[]  // User's audit log entries
 }
 
 enum Role {
@@ -145,4 +148,24 @@ model Settings {
   key         String   @unique
   value       String
   updatedAt   DateTime @updatedAt
+}
+
+// 审计日志表
+model AuditLog {
+  id           String      @id @default(cuid())
+  action       String      // AuditAction enum as string
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceType String?     // Type of resource (e.g., 'image', 'category')
+  resourceId   String?     // ID of the resource
+  details      String?     // JSON string of additional details
+  ipAddress    String?     // Client IP address
+  userAgent    String?     // Client user agent
+  timestamp    DateTime    @default(now())
+
+  // Performance indexes
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@index([resourceType, resourceId])
 }

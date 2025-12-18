@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { createImageSchema } from '@/schemas/image'
-import { z, ZodError } from 'zod'
+import { ZodError } from 'zod'
+import { createImageSchema, validateRequest } from '@/lib/validation'
 
 export async function GET() {
   try {
@@ -41,8 +41,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const validatedData = createImageSchema.parse(body)
+    // Check CSRF token
+    const csrfToken = request.headers.get('x-csrf-token')
+    if (!csrfToken) {
+      return NextResponse.json({ error: 'CSRF token required' }, { status: 403 })
+    }
+
+    const { data: validatedData, error } = await validateRequest(request, createImageSchema)
+    if (error) {
+      return error
+    }
 
     // Extract categories data and remove it from the main image data
     const { categories, ...imageData } = validatedData

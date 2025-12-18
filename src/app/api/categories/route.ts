@@ -2,16 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { z, ZodError } from 'zod'
-
-const categorySchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1),
-  description: z.string().optional(),
-  coverImage: z.string().optional(),
-  order: z.number().int().nonnegative(),
-  isActive: z.boolean()
-})
+import { ZodError } from 'zod'
+import { createCategorySchema, validateRequest } from '@/lib/validation'
 
 export async function GET() {
   try {
@@ -57,8 +49,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const validatedData = categorySchema.parse(body)
+    // Check CSRF token (basic implementation)
+    const csrfToken = request.headers.get('x-csrf-token')
+    if (!csrfToken) {
+      return NextResponse.json({ error: 'CSRF token required' }, { status: 403 })
+    }
+
+    const { data: validatedData, error } = await validateRequest(request, createCategorySchema)
+    if (error) {
+      return error
+    }
+
+    // Check for duplicate slug
+    const existing = await prisma.category.findUnique({
+      where: { slug: validatedData.slug }
+    })
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Category with this slug already exists' },
+        { status: 409 }
+      )
+    }
 
     const category = await prisma.category.create({
       data: validatedData

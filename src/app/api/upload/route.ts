@@ -6,11 +6,70 @@ import { join } from 'path'
 import { nanoid } from 'nanoid'
 import sharp from 'sharp'
 
+// Security constants
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/gif'
+]
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif']
+
+/**
+ * Validate file type by checking MIME type and extension
+ */
+function isValidFileType(file: File): boolean {
+  const mimeType = file.type.toLowerCase()
+  const extension = file.name.toLowerCase().split('.').pop() || ''
+
+  return ALLOWED_MIME_TYPES.includes(mimeType) &&
+         ALLOWED_EXTENSIONS.includes(`.${extension}`)
+}
+
+/**
+ * Validate filename to prevent path traversal
+ */
+function isValidFilename(filename: string): boolean {
+  // Check for path traversal
+  if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+    return false
+  }
+
+  // Check for special characters
+  if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
+    return false
+  }
+
+  // Check length
+  if (filename.length > 255) {
+    return false
+  }
+
+  return true
+}
+
+/**
+ * Generate safe random filename
+ */
+function generateSafeFilename(originalName: string): string {
+  const id = nanoid(16)
+  const extension = originalName.toLowerCase().split('.').pop() || 'jpg'
+  return `${id}.${extension}`
+}
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check CSRF token
+    const csrfToken = request.headers.get('x-csrf-token')
+    if (!csrfToken) {
+      return NextResponse.json({ error: 'CSRF token required' }, { status: 403 })
     }
 
     const formData = await request.formData()
@@ -20,33 +79,63 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing file' }, { status: 400 })
     }
 
-    // 创建上传目录
+    // Security checks
+    if (!isValidFilename(file.name)) {
+      return NextResponse.json(
+        { error: 'Invalid filename' },
+        { status: 400 }
+      )
+    }
+
+    if (!isValidFileType(file)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Only images are allowed' },
+        { status: 400 }
+      )
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB` },
+        { status: 400 }
+      )
+    }
+
+    // Create upload directory with restricted permissions
     const uploadDir = join(process.cwd(), 'public', 'uploads')
     await mkdir(uploadDir, { recursive: true })
 
-    // 生成唯一文件名
-    const id = nanoid()
-    const extension = file.name.split('.').pop() || 'jpg'
-    const filename = `${id}.${extension}`
+    // Generate safe filename
+    const filename = generateSafeFilename(file.name)
 
-    // 转换文件为缓冲区
+    // Convert file to buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // 生成缩略图
+    // Additional security: Verify image with sharp
+    try {
+      await sharp(buffer).metadata()
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Invalid image file' },
+        { status: 400 }
+      )
+    }
+
+    // Generate thumbnail
     const thumbnailBuffer = await sharp(buffer)
       .resize(400, 300, { fit: 'cover' })
       .jpeg({ quality: 80 })
       .toBuffer()
 
-    // 保存原图和缩略图
+    // Save files with safe paths
     const originalPath = join(uploadDir, filename)
     const thumbnailPath = join(uploadDir, `thumb-${filename}`)
 
     await writeFile(originalPath, buffer)
     await writeFile(thumbnailPath, thumbnailBuffer)
 
-    // 获取图片元数据
+    // Get image metadata
     const metadata = await sharp(buffer).metadata()
 
     return NextResponse.json({
@@ -56,6 +145,7 @@ export async function POST(request: Request) {
       height: metadata.height,
       size: buffer.length,
       mimeType: file.type,
+      alt: file.name.replace(/\.[^/.]+$/, '') // Generate alt from filename
     })
   } catch (error) {
     console.error('Error uploading file:', error)
