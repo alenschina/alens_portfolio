@@ -8,6 +8,7 @@ import {
   Navigation,
   Folder,
   Image,
+  Activity,
   LogOut
 } from 'lucide-react'
 
@@ -16,6 +17,7 @@ const navigation = [
   { name: 'Navigation', href: '/admin/navigation', icon: Navigation },
   { name: 'Categories', href: '/admin/categories', icon: Folder },
   { name: 'Images', href: '/admin/images', icon: Image },
+  { name: 'Performance', href: '/admin/performance', icon: Activity },
 ]
 
 export function AdminSidebar() {

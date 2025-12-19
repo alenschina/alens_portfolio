@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { ErrorBoundary } from "@/components/error/ErrorBoundary";
 import { useNavigation, useImagesByCategory } from "@/hooks/useApi";
 
 export default function Home() {
@@ -82,9 +83,9 @@ export default function Home() {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
+    <ErrorBoundary level="page">
+      <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {/* 移动端顶部导航栏 */}
       <header className="lg:hidden w-full p-6 border-b border-gray-100">
         <div className="flex items-center justify-between">
@@ -348,5 +349,6 @@ export default function Home() {
         )}
       </main>
     </div>
+    </ErrorBoundary>
   );
 }

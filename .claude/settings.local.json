@@ -12,7 +12,8 @@
       "Bash(npm uninstall @prisma/client prisma)",
       "Bash(curl:*)",
       "Bash(grep:*)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(npm pkg set:*)"
     ]
   }
 }

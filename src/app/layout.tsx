@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ErrorHandler } from "@/components/error/ErrorHandler";
+import { PerformanceTracker } from "@/components/performance";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -34,6 +36,8 @@ export default function RootLayout({
         className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <ErrorHandler />
+        <PerformanceTracker />
         {children}
       </body>
     </html>
