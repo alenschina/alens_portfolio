@@ -13,7 +13,9 @@
       "Bash(curl:*)",
       "Bash(grep:*)",
       "Bash(npm run build)",
-      "Bash(npm pkg set:*)"
+      "Bash(npm pkg set:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)"
     ]
   }
 }
