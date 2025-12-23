@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import type { ColumnConfig } from '@/types'
 import { useCrud } from '@/hooks/useCrud'
+import { getErrorMessage } from '@/lib/error-handler'
 
 interface CrudPageProps<T extends { id: string }> {
   title: string
@@ -119,7 +120,7 @@ export function CrudPage<T extends { id: string }>({
       {/* Error Display */}
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-800">{error}</p>
+          <p className="text-red-800">{getErrorMessage(error)}</p>
         </div>
       )}
 

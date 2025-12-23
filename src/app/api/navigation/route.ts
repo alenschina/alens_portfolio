@@ -8,9 +8,9 @@ const navigationSchema = z.object({
   title: z.string().min(1),
   slug: z.string().min(1),
   type: z.enum(['LINK', 'CATEGORY', 'PARENT', 'EXTERNAL']),
-  parentId: z.string().optional(),
-  categoryId: z.string().optional(),
-  externalUrl: z.string().optional(),
+  parentId: z.string().optional().nullable(),
+  categoryId: z.string().optional().nullable(),
+  externalUrl: z.string().optional().nullable(),
   order: z.number().int().nonnegative(),
   isVisible: z.boolean()
 })

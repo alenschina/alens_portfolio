@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     })
 
     if (!category) {
-      return NextResponse.json({ error: 'Category not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Category not found', slug }, { status: 404 })
     }
 
     // Filter images where the image itself is visible

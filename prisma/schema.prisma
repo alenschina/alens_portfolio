@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,18 +7,90 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 用户表 - 管理员账户
 model User {
-  id            String      @id @default(cuid())
-  email         String      @unique
-  name          String?
-  passwordHash  String
-  role          Role        @default(ADMIN)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  role         Role     @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
 
-  // Relations
-  auditLogs     AuditLog[]  // User's audit log entries
+model Navigation {
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
+  type        NavType      @default(LINK)
+  parentId    String?
+  categoryId  String?
+  externalUrl String?
+  order       Int          @default(0)
+  isVisible   Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  category    Category?    @relation(fields: [categoryId], references: [id])
+  parent      Navigation?  @relation("NavigationHierarchy", fields: [parentId], references: [id])
+  children    Navigation[] @relation("NavigationHierarchy")
+}
+
+model Category {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  description String?
+  coverImage  String?
+  order       Int             @default(0)
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  images      CategoryImage[]
+  navigation  Navigation[]
+}
+
+model Image {
+  id           String          @id @default(cuid())
+  title        String?
+  alt          String
+  description  String?
+  originalUrl  String
+  thumbnailUrl String?
+  width        Int?
+  height       Int?
+  size         Int?
+  mimeType     String?
+  order        Int             @default(0)
+  isVisible    Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  categories   CategoryImage[]
+
+  @@index([isVisible])
+}
+
+model CategoryImage {
+  id            String   @id @default(cuid())
+  imageId       String
+  categoryId    String
+  isCarousel    Boolean  @default(false)
+  carouselOrder Int?
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  image         Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([imageId, categoryId])
+  @@index([categoryId])
+  @@index([imageId])
+  @@index([isCarousel])
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
@@ -29,143 +98,9 @@ enum Role {
   SUPER_ADMIN
 }
 
-// 导航菜单表
-model Navigation {
-  id          String       @id @default(cuid())
-  title       String       // 显示名称
-  slug        String       @unique // URL 标识符
-  type        NavType      @default(LINK)
-  parentId    String?
-  parent      Navigation?  @relation("NavigationHierarchy", fields: [parentId], references: [id])
-  children    Navigation[] @relation("NavigationHierarchy")
-  categoryId  String?      @unique
-  category    Category?    @relation(fields: [categoryId], references: [id])
-  externalUrl String?      // 外部链接
-  order       Int          @default(0)
-  isVisible   Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  // Performance indexes
-  @@index([parentId])
-  @@index([order])
-  @@index([isVisible])
-  @@index([type])
-}
-
 enum NavType {
-  LINK       // 普通链接
-  CATEGORY   // 关联分类
-  PARENT     // 父级菜单（可折叠）
-  EXTERNAL   // 外部链接
-}
-
-// 作品分类表
-model Category {
-  id              String          @id @default(cuid())
-  name            String
-  slug            String          @unique
-  description     String?
-  coverImage      String?         // 封面图 URL
-  order           Int             @default(0)
-  isActive        Boolean         @default(true)
-  images          CategoryImage[]
-  navigation      Navigation?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-
-  // Performance indexes
-  @@index([order])
-  @@index([isActive])
-}
-
-// 图片表
-model Image {
-  id            String          @id @default(cuid())
-  title         String?
-  alt           String          // Alt 文本（SEO）
-  description   String?
-
-  // 图片 URL
-  originalUrl   String          // 原始图片
-  thumbnailUrl  String?         // 缩略图
-
-  // 元数据
-  width         Int?
-  height        Int?
-  size          Int?            // 文件大小 (bytes)
-  mimeType      String?
-
-  // 关联
-  categories    CategoryImage[]
-
-  order         Int             @default(0)
-  isVisible     Boolean         @default(true)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-
-  // Performance indexes
-  @@index([isVisible])
-  @@index([order])
-  @@index([createdAt])
-  @@index([mimeType])
-}
-
-// 分类-图片关联表 (多对多关系)
-model CategoryImage {
-  id              String    @id @default(cuid())
-  imageId         String
-  categoryId      String
-
-  // 轮播设置 (每个category中的独立设置)
-  isCarousel      Boolean   @default(false)
-  carouselOrder   Int?
-
-  order           Int       @default(0)
-
-  // 关联
-  image           Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  category        Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  // Composite indexes for common queries
-  @@unique([imageId, categoryId])
-  @@index([categoryId])
-  @@index([imageId])
-  @@index([isCarousel])
-  @@index([order])
-  @@index([carouselOrder])
-
-  // Composite index for carousel queries
-  @@index([categoryId, isCarousel])
-}
-
-// 网站设置表
-model Settings {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  value       String
-  updatedAt   DateTime @updatedAt
-}
-
-// 审计日志表
-model AuditLog {
-  id           String      @id @default(cuid())
-  action       String      // AuditAction enum as string
-  userId       String
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  resourceType String?     // Type of resource (e.g., 'image', 'category')
-  resourceId   String?     // ID of the resource
-  details      String?     // JSON string of additional details
-  ipAddress    String?     // Client IP address
-  userAgent    String?     // Client user agent
-  timestamp    DateTime    @default(now())
-
-  // Performance indexes
-  @@index([userId])
-  @@index([action])
-  @@index([timestamp])
-  @@index([resourceType, resourceId])
+  LINK
+  CATEGORY
+  PARENT
+  EXTERNAL
 }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { ErrorBoundary } from "@/components/error/ErrorBoundary";
 import { useNavigation, useImagesByCategory } from "@/hooks/useApi";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export default function Home() {
   const [currentImage, setCurrentImage] = useState(0);
@@ -72,7 +73,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600">{error}</p>
+          <p className="text-red-600">{getErrorMessage(error)}</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
@@ -133,12 +134,14 @@ export default function Home() {
           <ul className="space-y-6">
             {navigation.map((item) => {
               if (item.type === 'CATEGORY') {
+                // Use the actual category's slug, fallback to item.slug
+                const categorySlug = item.category?.slug || item.slug
                 return (
                   <li key={item.id}>
                     <button
-                      onClick={() => handleCategorySelect(item.slug)}
+                      onClick={() => handleCategorySelect(categorySlug)}
                       className={`text-left transition-colors ${
-                        selectedCategory === item.slug
+                        selectedCategory === categorySlug
                           ? 'text-black font-bold text-[13px] uppercase tracking-[0.15em]'
                           : 'text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black'
                       }`}
@@ -180,20 +183,24 @@ export default function Home() {
                       }`}
                     >
                       <ul className="ml-4 mt-3 space-y-2 pl-3 border-l border-gray-200">
-                        {item.children.map((child) => (
-                          <li key={child.id}>
-                            <button
-                              onClick={() => handleCategorySelect(child.slug)}
-                              className={`text-left transition-colors ${
-                                selectedCategory === child.slug
-                                  ? 'text-black font-bold text-[10px] uppercase tracking-[0.12em]'
-                                  : 'text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black'
-                              } block py-1 w-full`}
-                            >
-                              {child.title}
-                            </button>
-                          </li>
-                        ))}
+                        {item.children.map((child) => {
+                          // Use the actual category's slug for child items, fallback to child.slug
+                          const childCategorySlug = child.category?.slug || child.slug
+                          return (
+                            <li key={child.id}>
+                              <button
+                                onClick={() => handleCategorySelect(childCategorySlug)}
+                                className={`text-left transition-colors ${
+                                  selectedCategory === childCategorySlug
+                                    ? 'text-black font-bold text-[10px] uppercase tracking-[0.12em]'
+                                    : 'text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black'
+                                } block py-1 w-full`}
+                              >
+                                {child.title}
+                              </button>
+                            </li>
+                          )
+                        })}
                       </ul>
                     </div>
                   </li>

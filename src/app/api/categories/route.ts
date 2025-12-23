@@ -49,12 +49,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check CSRF token (basic implementation)
-    const csrfToken = request.headers.get('x-csrf-token')
-    if (!csrfToken) {
-      return NextResponse.json({ error: 'CSRF token required' }, { status: 403 })
-    }
-
     const { data: validatedData, error } = await validateRequest(request, createCategorySchema)
     if (error) {
       return error
