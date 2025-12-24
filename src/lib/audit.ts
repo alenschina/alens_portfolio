@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma'
+// import { prisma } from '@/lib/prisma'
+// TODO: Re-enable when AuditLog model is added to schema.prisma
 
 export enum AuditAction {
   // User actions
@@ -42,23 +43,17 @@ export interface AuditLogData {
  * Create an audit log entry
  */
 export async function createAuditLog(data: AuditLogData): Promise<void> {
-  try {
-    await prisma.auditLog.create({
-      data: {
-        action: data.action,
-        userId: data.userId,
-        resourceType: data.resourceType,
-        resourceId: data.resourceId,
-        details: data.details ? JSON.stringify(data.details) : null,
-        ipAddress: data.ipAddress,
-        userAgent: data.userAgent,
-        timestamp: new Date()
-      }
-    })
-  } catch (error) {
-    console.error('Failed to create audit log:', error)
-    // Don't throw - audit logging shouldn't break the main operation
-  }
+  // TODO: Re-enable database logging when AuditLog model is added to schema
+  console.log('[Audit]', {
+    action: data.action,
+    userId: data.userId,
+    resourceType: data.resourceType,
+    resourceId: data.resourceId,
+    details: data.details,
+    ipAddress: data.ipAddress,
+    userAgent: data.userAgent,
+    timestamp: new Date().toISOString()
+  })
 }
 
 /**
@@ -159,33 +154,7 @@ export async function getAuditLogs(filters: {
   limit?: number
   offset?: number
 }) {
-  const where: any = {}
-
-  if (filters.userId) where.userId = filters.userId
-  if (filters.action) where.action = filters.action
-  if (filters.resourceType) where.resourceType = filters.resourceType
-
-  if (filters.startDate || filters.endDate) {
-    where.timestamp = {}
-    if (filters.startDate) where.timestamp.gte = filters.startDate
-    if (filters.endDate) where.timestamp.lte = filters.endDate
-  }
-
-  const logs = await prisma.auditLog.findMany({
-    where,
-    orderBy: { timestamp: 'desc' },
-    take: filters.limit || 100,
-    skip: filters.offset || 0,
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          name: true
-        }
-      }
-    }
-  })
-
-  return logs
+  // TODO: Re-enable database query when AuditLog model is added to schema
+  console.log('[Audit] getAuditLogs called (disabled)')
+  return []
 }

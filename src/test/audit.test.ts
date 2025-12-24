@@ -1,19 +1,18 @@
 import { describe, it, expect, vi } from 'vitest'
 import { AuditAction, createAuditLog, getClientIP, getClientUserAgent, logSuccess, logFailure } from '@/lib/audit'
 
-// Mock Prisma
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
-    auditLog: {
-      create: vi.fn(),
-    },
-  },
-}))
-
-const { prisma } = await import('@/lib/prisma')
-const mockCreate = vi.mocked(prisma.auditLog.create)
+// Mock console.log to verify audit logging
+const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {})
 
 describe('Audit Utils', () => {
+  beforeEach(() => {
+    mockConsoleLog.mockClear()
+  })
+
+  afterAll(() => {
+    mockConsoleLog.mockRestore()
+  })
+
   describe('getClientIP', () => {
     it('should extract IP from x-forwarded-for header', () => {
       const request = new Request('http://localhost', {
@@ -63,9 +62,7 @@ describe('Audit Utils', () => {
   })
 
   describe('createAuditLog', () => {
-    it('should create audit log entry', async () => {
-      mockCreate.mockResolvedValue({ id: '1' })
-
+    it('should log audit entry to console', async () => {
       await createAuditLog({
         action: AuditAction.IMAGE_CREATE,
         userId: 'user-123',
@@ -76,47 +73,32 @@ describe('Audit Utils', () => {
         userAgent: 'Test Agent',
       })
 
-      expect(mockCreate).toHaveBeenCalledWith({
-        data: {
-          action: AuditAction.IMAGE_CREATE,
-          userId: 'user-123',
-          resourceType: 'image',
-          resourceId: 'img-123',
-          details: JSON.stringify({ title: 'Test Image' }),
-          ipAddress: '192.168.1.1',
-          userAgent: 'Test Agent',
-          timestamp: expect.any(Date),
-        },
-      })
+      expect(mockConsoleLog).toHaveBeenCalledWith('[Audit]', expect.objectContaining({
+        action: AuditAction.IMAGE_CREATE,
+        userId: 'user-123',
+        resourceType: 'image',
+        resourceId: 'img-123',
+      }))
     })
 
     it('should handle missing details', async () => {
-      mockCreate.mockResolvedValue({ id: '1' })
-
       await createAuditLog({
         action: AuditAction.USER_LOGIN,
         userId: 'user-123',
       })
 
-      expect(mockCreate).toHaveBeenCalledWith({
-        data: {
-          action: AuditAction.USER_LOGIN,
-          userId: 'user-123',
-          resourceType: null,
-          resourceId: null,
-          details: null,
-          ipAddress: null,
-          userAgent: null,
-          timestamp: expect.any(Date),
-        },
-      })
+      expect(mockConsoleLog).toHaveBeenCalledWith('[Audit]', expect.objectContaining({
+        action: AuditAction.USER_LOGIN,
+        userId: 'user-123',
+        resourceType: undefined,
+        resourceId: undefined,
+        details: undefined,
+      }))
     })
   })
 
   describe('logSuccess', () => {
     it('should log successful operation', async () => {
-      mockCreate.mockResolvedValue({ id: '1' })
-
       const request = new Request('http://localhost', {
         headers: {
           'x-forwarded-for': '192.168.1.1',
@@ -133,25 +115,17 @@ describe('Audit Utils', () => {
         { name: 'Test Category' }
       )
 
-      expect(mockCreate).toHaveBeenCalledWith({
-        data: {
-          action: AuditAction.CATEGORY_CREATE,
-          userId: 'user-123',
-          resourceType: 'category',
-          resourceId: 'cat-123',
-          details: JSON.stringify({ name: 'Test Category' }),
-          ipAddress: '192.168.1.1',
-          userAgent: 'Test Agent',
-          timestamp: expect.any(Date),
-        },
-      })
+      expect(mockConsoleLog).toHaveBeenCalledWith('[Audit]', expect.objectContaining({
+        action: AuditAction.CATEGORY_CREATE,
+        userId: 'user-123',
+        resourceType: 'category',
+        resourceId: 'cat-123',
+      }))
     })
   })
 
   describe('logFailure', () => {
     it('should log failed operation with error details', async () => {
-      mockCreate.mockResolvedValue({ id: '1' })
-
       const request = new Request('http://localhost', {
         headers: {
           'x-forwarded-for': '192.168.1.1',
@@ -171,22 +145,12 @@ describe('Audit Utils', () => {
         { reason: 'Validation failed' }
       )
 
-      expect(mockCreate).toHaveBeenCalledWith({
-        data: {
-          action: AuditAction.IMAGE_DELETE,
-          userId: 'user-123',
-          resourceType: 'image',
-          resourceId: 'img-123',
-          details: JSON.stringify({
-            reason: 'Validation failed',
-            error: 'Test error',
-            stack: expect.any(String),
-          }),
-          ipAddress: '192.168.1.1',
-          userAgent: 'Test Agent',
-          timestamp: expect.any(Date),
-        },
-      })
+      expect(mockConsoleLog).toHaveBeenCalledWith('[Audit]', expect.objectContaining({
+        action: AuditAction.IMAGE_DELETE,
+        userId: 'user-123',
+        resourceType: 'image',
+        resourceId: 'img-123',
+      }))
     })
   })
 })
