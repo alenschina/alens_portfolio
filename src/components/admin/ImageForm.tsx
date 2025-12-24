@@ -151,6 +151,12 @@ export function ImageForm({ item, categories, onSubmit, onCancel, loading }: Ima
             mimeType: uploadedImageData?.mimeType
           }
 
+      // Validate that image was uploaded for new images
+      if (!item && !uploadedImageData?.url) {
+        alert('Please upload an image first')
+        return
+      }
+
       await onSubmit(payload)
     } catch (error) {
       console.error('Error submitting form:', error)
@@ -273,7 +279,7 @@ export function ImageForm({ item, categories, onSubmit, onCancel, loading }: Ima
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || (!item && !uploadedImageData?.url)}>
           {loading ? 'Saving...' : (item ? 'Update' : 'Create')}
         </Button>
       </div>

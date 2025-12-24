@@ -32,18 +32,18 @@ function isValidFileType(file: File): boolean {
  * Validate filename to prevent path traversal
  */
 function isValidFilename(filename: string): boolean {
+  // Check for null byte
+  if (filename.includes('\0')) {
+    return false
+  }
+
   // Check for path traversal
   if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
     return false
   }
 
-  // Check for special characters
-  if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
-    return false
-  }
-
   // Check length
-  if (filename.length > 255) {
+  if (filename.length > 255 || filename.length < 1) {
     return false
   }
 

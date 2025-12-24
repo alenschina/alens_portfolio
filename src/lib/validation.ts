@@ -48,6 +48,11 @@ export function isValidUrl(url: string): boolean {
  * Validate image URL (allow only safe protocols)
  */
 export function isValidImageUrl(url: string): boolean {
+  // Allow relative URLs (local uploads)
+  if (url.startsWith('/')) {
+    return true
+  }
+
   if (!isValidUrl(url)) return false
 
   try {
