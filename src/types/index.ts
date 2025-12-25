@@ -268,5 +268,24 @@ export interface CacheConfig {
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>
 
+// About Page Types
+export interface AboutData {
+  name: string
+  avatar: string
+  intro: string
+  description: string
+}
+
+// Contact Page Types
+export interface ContactData {
+  title: string
+  representation: string
+  address: string
+  city: string
+  phone: string
+  email: string
+  website: string
+}
+
 // Re-export commonly used types from other modules
 export type { Session, User as NextAuthUser } from 'next-auth'

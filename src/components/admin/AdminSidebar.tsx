@@ -9,7 +9,9 @@ import {
   Folder,
   Image,
   Activity,
-  LogOut
+  LogOut,
+  User,
+  Mail
 } from 'lucide-react'
 
 const navigation = [
@@ -17,6 +19,8 @@ const navigation = [
   { name: 'Navigation', href: '/admin/navigation', icon: Navigation },
   { name: 'Categories', href: '/admin/categories', icon: Folder },
   { name: 'Images', href: '/admin/images', icon: Image },
+  { name: 'About', href: '/admin/about', icon: User },
+  { name: 'Contact', href: '/admin/contact', icon: Mail },
   { name: 'Performance', href: '/admin/performance', icon: Activity },
 ]
 

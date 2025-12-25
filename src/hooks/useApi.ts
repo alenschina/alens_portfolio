@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import type { NavigationItem, Category, Image, CategoryImage } from '@/types'
+import type { NavigationItem, Category, Image, CategoryImage, AboutData, ContactData } from '@/types'
 
 // Generic fetcher function
 const fetcher = async (url: string) => {
@@ -139,5 +139,37 @@ export function useDashboardStats() {
     stats,
     isLoading,
     isError: !isLoading && (!categories || !images || !navigation)
+  }
+}
+
+// About page data hook
+export function useAbout() {
+  const { data, error, isLoading, mutate } = useSWR<AboutData>(
+    '/api/about',
+    fetcher,
+    CACHE_CONFIG.STATIC
+  )
+
+  return {
+    about: data || { name: '', avatar: '', intro: '', description: '' },
+    isLoading,
+    isError: error,
+    mutate
+  }
+}
+
+// Contact page data hook
+export function useContact() {
+  const { data, error, isLoading, mutate } = useSWR<ContactData>(
+    '/api/contact',
+    fetcher,
+    CACHE_CONFIG.STATIC
+  )
+
+  return {
+    contact: data || { title: '', representation: '', address: '', city: '', phone: '', email: '', website: '' },
+    isLoading,
+    isError: error,
+    mutate
   }
 }
