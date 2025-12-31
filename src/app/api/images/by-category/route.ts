@@ -26,18 +26,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Category not found', slug }, { status: 404 })
     }
 
-    // Filter images where the image itself is visible
-    const visibleImages = category.images.filter(ci => ci.image.isVisible)
-
-    // Transform the data to include image details directly
-    const images = visibleImages.map(ci => ({
-      ...ci.image,
-      categoryImage: {
-        isCarousel: ci.isCarousel,
-        carouselOrder: ci.carouselOrder,
-        order: ci.order
-      }
-    }))
+    // Filter and sort images by order
+    const images = category.images
+      .filter(ci => ci.image.isVisible)
+      .sort((a, b) => a.order - b.order)
+      .map(ci => ({
+        ...ci.image,
+        categoryImage: {
+          isCarousel: ci.isCarousel,
+          carouselOrder: ci.carouselOrder,
+          order: ci.order
+        }
+      }))
 
     return NextResponse.json(images)
   } catch (error) {

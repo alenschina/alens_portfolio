@@ -20,12 +20,13 @@ export async function GET() {
     const navigation = await prisma.navigation.findMany({
       include: {
         children: {
+          where: { isVisible: true },
           include: { category: true },
           orderBy: { order: 'asc' }
         },
         category: true
       },
-      where: { parentId: null },
+      where: { parentId: null, isVisible: true },
       orderBy: { order: 'asc' }
     })
     return NextResponse.json(navigation)
