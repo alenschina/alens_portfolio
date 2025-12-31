@@ -461,7 +461,7 @@ export default function Home() {
               {/* 缩略图列表 - 仅在非首页显示 */}
               {selectedCategory !== "home" && images.length > 0 && (
                 <div className="mt-8 border-t border-gray-200 pt-8">
-                  <div className="flex gap-3 overflow-x-auto pb-4">
+                  <div className="flex gap-3 overflow-x-auto pb-4 max-w-full">
                     {images.map((image, index) => (
                       <button
                         key={image.id}
