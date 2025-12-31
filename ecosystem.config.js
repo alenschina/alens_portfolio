@@ -1,8 +1,8 @@
 module.exports = {
   apps: [{
     name: 'alens_portfolio',
-    script: 'node',
-    args: '.next/standalone/server.js',
+    script: 'npm',
+    args: 'start',
     cwd: '/deploy/alens_portfolio',
     env: {
       NODE_ENV: 'production',

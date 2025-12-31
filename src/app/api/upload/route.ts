@@ -133,8 +133,8 @@ export async function POST(request: Request) {
     const metadata = await sharp(buffer).metadata()
 
     return NextResponse.json({
-      url: `/uploads/${filename}`,
-      thumbnailUrl: `/uploads/thumb-${filename}`,
+      url: `/api/uploads/${filename}`,
+      thumbnailUrl: `/api/uploads/thumb-${filename}`,
       width: metadata.width,
       height: metadata.height,
       size: buffer.length,
