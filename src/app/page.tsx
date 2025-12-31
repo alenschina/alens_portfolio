@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ErrorBoundary } from "@/components/error/ErrorBoundary";
 import { useNavigation, useImagesByCategory, useAbout, useContact } from "@/hooks/useApi";
 import { getErrorMessage } from "@/lib/error-handler";
@@ -14,6 +14,29 @@ export default function Home() {
     portfolio: false,
     works: false,
   });
+
+  const thumbnailRef = useRef<HTMLDivElement>(null);
+
+  // 滚动缩略图到选中项
+  const scrollThumbnailToCenter = (index: number) => {
+    const container = thumbnailRef.current;
+    if (!container) return;
+
+    const thumbnails = container.querySelectorAll('[data-thumbnail]');
+    const target = thumbnails[index] as HTMLElement;
+    if (!target) return;
+
+    const containerWidth = container.clientWidth;
+    const targetWidth = target.offsetWidth;
+    const targetLeft = target.offsetLeft;
+
+    const scrollPosition = targetLeft - (containerWidth - targetWidth) / 2;
+
+    container.scrollTo({
+      left: scrollPosition,
+      behavior: 'smooth'
+    });
+  };
 
   // Use SWR hooks for data fetching with caching
   const { navigation, isLoading: navLoading, isError: navError } = useNavigation();
@@ -36,6 +59,13 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, [images.length, selectedCategory]);
+
+  // currentImage 变化时同步滚动缩略图
+  useEffect(() => {
+    if (selectedCategory !== "home" && images.length > 0) {
+      scrollThumbnailToCenter(currentImage);
+    }
+  }, [currentImage, selectedCategory, images.length]);
 
   const goToPrevious = () => {
     setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
@@ -95,7 +125,7 @@ export default function Home() {
 
   return (
     <ErrorBoundary level="page">
-      <div className="min-h-screen bg-white flex flex-col lg:flex-row">
+      <div className="min-h-screen bg-white flex flex-col lg:flex-row overflow-hidden">
         {/* 移动端顶部导航栏 */}
         <header className="lg:hidden w-full p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
@@ -274,7 +304,7 @@ export default function Home() {
         </aside>
 
         {/* 右侧内容区域 */}
-        <main className="flex-1 relative flex flex-col p-12 lg:p-20">
+        <main className="flex-1 relative flex flex-col p-12 lg:p-20 min-w-0">
           {/* About 页面内容 - 三栏布局 */}
           {isAboutPage ? (
             <div className="w-full h-full flex flex-row gap-8 lg:gap-12 items-start">
@@ -380,8 +410,8 @@ export default function Home() {
           ) : (
             <>
               {/* 图片轮播区域 */}
-              <div className="relative w-full flex-1 flex items-center justify-center min-h-[60vh] lg:min-h-[calc(100vh-12rem)]">
-                <div className="relative w-full h-[60vh] lg:h-full relative overflow-hidden flex items-center justify-center">
+              <div className="relative w-full h-[calc(100%-3.5rem)] flex items-center justify-center">
+                <div className="relative w-full h-full relative overflow-hidden flex items-center justify-center">
                   {/* 幻灯片图片 */}
                   <div className="relative w-full h-full">
                     {images.length === 0 ? (
@@ -460,13 +490,14 @@ export default function Home() {
 
               {/* 缩略图列表 - 仅在非首页显示 */}
               {selectedCategory !== "home" && images.length > 0 && (
-                <div className="mt-8 border-t border-gray-200 pt-8">
-                  <div className="flex gap-3 overflow-x-auto pb-4 max-w-full">
+                <div className="h-16 border-t border-gray-200 pt-3 w-full flex-shrink-0">
+                  <div ref={thumbnailRef} className="flex gap-2 overflow-x-auto h-full w-full scrollbar-hide items-center">
                     {images.map((image, index) => (
                       <button
                         key={image.id}
+                        data-thumbnail
                         onClick={() => goToSlide(index)}
-                        className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${
+                        className={`relative flex-shrink-0 w-14 h-14 rounded overflow-hidden transition-all ${
                           index === currentImage
                             ? "opacity-100"
                             : "opacity-60 hover:opacity-80"
@@ -475,8 +506,8 @@ export default function Home() {
                         <Image
                           src={image.thumbnailUrl || image.originalUrl}
                           alt={image.alt}
-                          width={80}
-                          height={80}
+                          width={56}
+                          height={56}
                           unoptimized
                           className="w-full h-full object-cover"
                         />
