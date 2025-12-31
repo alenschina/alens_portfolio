@@ -18,7 +18,7 @@ export default function NavigationPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('/api/categories')
+      const res = await fetch('/api/categories?admin=true')
       const data = await res.json()
       setCategories(data)
     } catch (error) {
