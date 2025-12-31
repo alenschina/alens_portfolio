@@ -49,11 +49,39 @@ export async function POST(request: Request) {
     // Extract categories data and remove it from the main image data
     const { categories, ...imageData } = validatedData
 
+    // Auto-assign order if not provided or if it's 0
+    const processedCategories = categories?.map(cat => {
+      // If order is 0 or not provided, auto-assign the next order
+      const order = cat.order || 0
+      return {
+        categoryId: cat.categoryId,
+        isCarousel: cat.isCarousel,
+        carouselOrder: cat.carouselOrder,
+        order
+      }
+    })
+
+    // For each category, if order is 0 or was auto-assigned, get the max order and add 1
+    const categoriesWithAutoOrder = await Promise.all(processedCategories?.map(async (cat) => {
+      if (cat.order === 0) {
+        const maxOrder = await prisma.categoryImage.findFirst({
+          where: { categoryId: cat.categoryId },
+          orderBy: { order: 'desc' },
+          select: { order: true }
+        })
+        return {
+          ...cat,
+          order: (maxOrder?.order ?? -1) + 1
+        }
+      }
+      return cat
+    }) || [])
+
     const image = await prisma.image.create({
       data: {
         ...imageData,
-        categories: categories ? {
-          create: categories.map(cat => ({
+        categories: categoriesWithAutoOrder.length > 0 ? {
+          create: categoriesWithAutoOrder.map(cat => ({
             categoryId: cat.categoryId,
             isCarousel: cat.isCarousel,
             carouselOrder: cat.carouselOrder,
