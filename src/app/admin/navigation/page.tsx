@@ -221,6 +221,7 @@ export default function NavigationPage() {
       <CrudPage<NavigationItem>
         title="Navigation Management"
         apiEndpoint="/api/navigation"
+        admin={true}
         columns={columns}
         onEdit={(item) => {
           console.log('Edit navigation:', item)
