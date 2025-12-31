@@ -5,9 +5,13 @@ import { authOptions } from '@/lib/auth'
 import { ZodError } from 'zod'
 import { createCategorySchema, validateRequest } from '@/lib/validation'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const admin = searchParams.get('admin') === 'true'
+
     const categories = await prisma.category.findMany({
+      where: admin ? {} : { isActive: true },
       include: {
         images: {
           orderBy: { order: 'asc' },
@@ -20,19 +24,28 @@ export async function GET() {
       orderBy: { order: 'asc' }
     })
 
-    // Filter images where the image itself is visible
+    // Filter images where the image itself is visible (前台才过滤)
     const transformedCategories = categories.map(category => ({
       ...category,
-      images: category.images
-        .filter(ci => ci.image.isVisible)
-        .map(ci => ({
-          ...ci.image,
-          categoryImage: {
-            isCarousel: ci.isCarousel,
-            carouselOrder: ci.carouselOrder,
-            order: ci.order
-          }
-        }))
+      images: admin
+        ? category.images.map(ci => ({
+            ...ci.image,
+            categoryImage: {
+              isCarousel: ci.isCarousel,
+              carouselOrder: ci.carouselOrder,
+              order: ci.order
+            }
+          }))
+        : category.images
+            .filter(ci => ci.image.isVisible)
+            .map(ci => ({
+              ...ci.image,
+              categoryImage: {
+                isCarousel: ci.isCarousel,
+                carouselOrder: ci.carouselOrder,
+                order: ci.order
+              }
+            }))
     }))
 
     return NextResponse.json(transformedCategories)

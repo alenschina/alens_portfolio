@@ -15,17 +15,25 @@ const navigationSchema = z.object({
   isVisible: z.boolean()
 })
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const admin = searchParams.get('admin') === 'true'
+
+    const where = admin
+      ? { parentId: null }
+      : { parentId: null, isVisible: true }
+
     const navigation = await prisma.navigation.findMany({
       include: {
         children: {
+          where: admin ? {} : { isVisible: true },
           include: { category: true },
           orderBy: { order: 'asc' }
         },
         category: true
       },
-      where: { parentId: null },
+      where,
       orderBy: { order: 'asc' }
     })
     return NextResponse.json(navigation)

@@ -28,7 +28,7 @@ export default function NavigationPage() {
 
   const fetchNavigation = async () => {
     try {
-      const res = await fetch('/api/navigation')
+      const res = await fetch('/api/navigation?admin=true')
       const data = await res.json()
       setNavigation(data)
     } catch (error) {

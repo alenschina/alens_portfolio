@@ -36,9 +36,9 @@ export const CACHE_CONFIG = {
 }
 
 // Navigation API hook
-export function useNavigation() {
+export function useNavigation(admin = false) {
   const { data, error, isLoading, mutate } = useSWR<NavigationItem[]>(
-    '/api/navigation',
+    admin ? '/api/navigation?admin=true' : '/api/navigation',
     fetcher,
     CACHE_CONFIG.STATIC
   )
@@ -52,9 +52,9 @@ export function useNavigation() {
 }
 
 // Categories API hook
-export function useCategories() {
+export function useCategories(admin = false) {
   const { data, error, isLoading, mutate } = useSWR<Category[]>(
-    '/api/categories',
+    admin ? '/api/categories?admin=true' : '/api/categories',
     fetcher,
     CACHE_CONFIG.STATIC
   )
@@ -119,9 +119,9 @@ export function useApiData<T>(url: string | null, config: typeof CACHE_CONFIG.DY
 
 // Dashboard stats hook - combines multiple APIs
 export function useDashboardStats() {
-  const { categories, isLoading: categoriesLoading } = useCategories()
+  const { categories, isLoading: categoriesLoading } = useCategories(true)
   const { images, isLoading: imagesLoading } = useImages()
-  const { navigation, isLoading: navigationLoading } = useNavigation()
+  const { navigation, isLoading: navigationLoading } = useNavigation(true)
 
   const isLoading = categoriesLoading || imagesLoading || navigationLoading
 
