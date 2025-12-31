@@ -14,7 +14,7 @@ export async function GET(request: Request) {
       where: { slug },
       include: {
         images: {
-          orderBy: { order: 'asc' },
+          orderBy: { carouselOrder: 'asc' },
           include: {
             image: true
           }
@@ -26,10 +26,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Category not found', slug }, { status: 404 })
     }
 
-    // Filter and sort images by order
+    // Filter carousel images and sort by carouselOrder
     const images = category.images
-      .filter(ci => ci.image.isVisible)
-      .sort((a, b) => a.order - b.order)
+      .filter(ci => ci.image.isVisible && ci.isCarousel)
+      .sort((a, b) => (a.carouselOrder ?? 0) - (b.carouselOrder ?? 0))
       .map(ci => ({
         ...ci.image,
         categoryImage: {
