@@ -23,6 +23,7 @@ interface CrudPageProps<T extends { id: string }> {
     loading?: boolean
   }) => React.ReactElement
   transform?: (data: any) => T
+  admin?: boolean
 }
 
 /**
@@ -36,12 +37,13 @@ export function CrudPage<T extends { id: string }>({
   onEdit,
   onDelete,
   renderForm,
-  transform
+  transform,
+  admin = false
 }: CrudPageProps<T>) {
   const { items, loading, error, createItem, updateItem, deleteItem } = useCrud<T>({
     apiEndpoint,
     transform
-  })
+  }, admin)
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<T | null>(null)

@@ -29,8 +29,8 @@ export default function ImagesPage() {
     setLoading(true)
     setError(null)
     try {
-      // Fetch categories
-      const categoriesRes = await fetch('/api/categories')
+      // Fetch categories (admin mode to show all)
+      const categoriesRes = await fetch('/api/categories?admin=true')
       if (!categoriesRes.ok) throw new Error('Failed to fetch categories')
       const categoriesData = await categoriesRes.json()
       setCategories(categoriesData)

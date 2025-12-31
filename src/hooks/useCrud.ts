@@ -8,11 +8,14 @@ import type { UseCrudOptions, UseCrudReturn } from '@/types'
  * Provides common state management and operations for all CRUD entities
  */
 export function useCrud<T extends { id: string }>(
-  options: UseCrudOptions<T>
+  options: UseCrudOptions<T>,
+  admin = false
 ): UseCrudReturn<T> {
   const [items, setItems] = useState<T[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const apiEndpoint = admin ? `${options.apiEndpoint}?admin=true` : options.apiEndpoint
 
   /**
    * Fetch all items from the API
@@ -22,7 +25,7 @@ export function useCrud<T extends { id: string }>(
       setLoading(true)
       setError(null)
 
-      const res = await fetch(options.apiEndpoint, {
+      const res = await fetch(apiEndpoint, {
         cache: 'no-store'
       })
 
@@ -39,7 +42,7 @@ export function useCrud<T extends { id: string }>(
     } finally {
       setLoading(false)
     }
-  }, [options.apiEndpoint, options.transform])
+  }, [apiEndpoint, options.transform])
 
   /**
    * Create a new item

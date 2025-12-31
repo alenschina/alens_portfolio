@@ -37,6 +37,7 @@ export default function CategoriesPage() {
     <CrudPage<Category>
       title="Categories Management"
       apiEndpoint="/api/categories"
+      admin={true}
       columns={columns}
       onEdit={(item) => console.log('Edit category:', item)}
       onDelete={(item) => console.log('Delete category:', item)}
