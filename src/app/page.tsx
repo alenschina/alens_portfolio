@@ -316,7 +316,6 @@ export default function Home() {
                       src={about.avatar}
                       alt={about.name}
                       fill
-                      unoptimized
                       className="object-cover"
                     />
                   ) : (
@@ -431,7 +430,6 @@ export default function Home() {
                             alt={image.alt}
                             width={1200}
                             height={800}
-                            unoptimized
                             className="max-w-full max-h-full object-contain"
                             priority={index === currentImage}
                           />
@@ -508,7 +506,6 @@ export default function Home() {
                           alt={image.alt}
                           width={56}
                           height={56}
-                          unoptimized
                           className="w-full h-full object-cover"
                         />
                       </button>
