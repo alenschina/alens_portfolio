@@ -1,20 +1,8 @@
-const { execSync } = require('child_process')
-const path = require('path')
 const fs = require('fs')
+const path = require('path')
 
-// Copy public folder
-const publicSource = path.join(__dirname, 'public')
-const publicDest = path.join(__dirname, '.next', 'standalone', 'public')
-
-try {
-  execSync(`cp -r "${publicSource}" "${publicDest}"`, { stdio: 'inherit' })
-  console.log('✅ Static assets copied to standalone directory')
-} catch (error) {
-  console.error('❌ Failed to copy static assets:', error.message)
-  process.exit(1)
-}
-
-// Copy prisma folder (database)
+// Note: public/uploads is no longer copied since images are stored in Tencent COS
+// Only copy prisma folder (database) for production
 const prismaSource = path.join(__dirname, 'prisma')
 const prismaDest = path.join(__dirname, '.next', 'standalone', 'prisma')
 
