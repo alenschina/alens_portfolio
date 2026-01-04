@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Tech Stack
 
-- **Framework**: Next.js 16.0.8 with App Router
+- **Framework**: Next.js 16.0.10 with App Router
 - **Language**: TypeScript (strict mode)
 - **Database**: SQLite + Prisma ORM v6.19.1
 - **Auth**: NextAuth.js v4 with JWT sessions
@@ -22,7 +22,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Forms**: React Hook Form + Zod validation
 - **Data Fetching**: SWR
 - **Image Processing**: Sharp
-- **Tests**: Vitest + @testing-library
+- **Tests**: Vitest + @testing-library (Happy-dom/jsdom)
+- **DnD**: @dnd-kit for drag-and-drop ordering
 
 ## Commands
 
@@ -35,7 +36,8 @@ npm run format     # Prettier auto-format
 npm run format:check  # Check formatting
 
 # Testing
-npm run test       # Vitest dev mode with UI
+npm run test       # Vitest dev mode
+npm run test:ui    # Vitest with UI browser
 npm run test:run   # Run tests once
 npm run test:coverage  # With coverage report
 
@@ -69,26 +71,31 @@ src/
 │   ├── admin/           # Admin components
 │   └── error/           # Error boundary/handler
 ├── hooks/               # Custom React hooks
-│   ├── useApi.ts        # Data fetching hooks
+│   ├── useApi.ts        # SWR data fetching hooks
 │   ├── useCrud.ts       # CRUD operations
-│   └── useFileUpload.ts # File upload handling
+│   ├── useFileUpload.ts # File upload handling
+│   ├── useCategorySelection.ts  # Category state management
+│   └── usePerformanceMonitor.ts # Performance tracking
 ├── lib/
-│   ├── prisma.ts        # Prisma client
+│   ├── prisma.ts        # Prisma client singleton
 │   ├── auth.ts          # NextAuth config
-│   └── api-client.ts    # API helpers
+│   ├── api-client.ts    # API helpers
+│   ├── audit.ts         # Admin action logging
+│   ├── error-handler.ts # Error boundary helpers
+│   └── validation.ts    # Zod schemas
 └── middleware.ts        # Auth + security headers
 ```
 
 ## Database Schema
 
-**SQLite with Prisma ORM** - 5 models:
+**SQLite with Prisma ORM** - 6 models:
 
 1. **User** - Admin accounts with role (ADMIN/SUPER_ADMIN)
-2. **Navigation** - Multi-level menu (self-referencing parentId)
-3. **Category** - Image categories with slug, coverImage
-4. **Image** - Portfolio images with metadata
-5. **CategoryImage** - Many-to-many join table (image ↔ category)
-6. **Settings** - Key-value store
+2. **Navigation** - Multi-level menu (self-referencing parentId, supports LINK/CATEGORY/PARENT/EXTERNAL types)
+3. **Category** - Image categories with slug, coverImage, order
+4. **Image** - Portfolio images with metadata, thumbnail, order
+5. **CategoryImage** - Many-to-many join table with carousel support (isCarousel, carouselOrder)
+6. **Settings** - Key-value store for site settings
 
 ## Key Architecture
 
@@ -104,17 +111,20 @@ RESTful endpoints with Zod validation:
 - `GET/POST/PUT/DELETE /api/categories`
 - `GET/POST/PUT/DELETE /api/images`
 - `GET /api/images/by-category?slug={slug}`
-- `POST /api/upload` - Multipart file upload
+- `POST /api/upload` - Multipart file upload with Sharp processing
+- `GET /api/about`, `GET /api/contact` - Public content pages
+- `GET /api/uploads/[...slug]` - Serve uploaded files
 
 ### Data Fetching
 - **SWR** for client-side caching (`useNavigation`, `useImagesByCategory`)
 - Custom hooks in `src/hooks/useApi.ts`
 
 ### Image Management
-- Unsplash CDN for portfolio images
+- Unsplash CDN for external portfolio images
 - Local uploads in `public/uploads/`
 - Sharp processing: auto-generate WebP thumbnails (400x300)
 - Image URLs: `/uploads/{file}` and `/uploads/thumb-{file}`
+- Carousel: @dnd-kit for drag-and-drop ordering, displayed by `carouselOrder`
 
 ### Security Headers
 Middleware (`src/middleware.ts`) sets CSP, X-Frame-Options, HSTS, Referrer-Policy, etc.
