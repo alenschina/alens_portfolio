@@ -101,9 +101,10 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Additional security: Verify image with sharp
+    // Verify image with sharp and get metadata
+    let metadata: sharp.Metadata
     try {
-      await sharp(buffer).metadata()
+      metadata = await sharp(buffer).metadata()
     } catch (error) {
       return NextResponse.json(
         { error: 'Invalid image file' },
@@ -137,9 +138,6 @@ export async function POST(request: Request) {
       console.warn('Failed to upload thumbnail, continuing without it:', err)
       thumbnailUrl = undefined
     }
-
-    // Get image metadata
-    const metadata = await sharp(buffer).metadata()
 
     return NextResponse.json({
       url,

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { NextResponse } from 'next/server'
 import { NavigationType } from '@/types'
 
 // ====================
@@ -254,6 +255,3 @@ export async function validateRequest<T>(
     }
   }
 }
-
-// Re-export NextResponse for use in validation helpers
-import { NextResponse } from 'next/server'

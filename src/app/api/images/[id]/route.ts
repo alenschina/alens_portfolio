@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { updateImageSchema } from '@/schemas/image'
+import { updateImageSchema } from '@/lib/validation'
 import { z } from 'zod'
 
 export async function GET(

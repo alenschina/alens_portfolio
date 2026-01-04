@@ -18,16 +18,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     })
 
-    // Transform the data to include categories in a more convenient format
-    const transformedImages = images.map(image => ({
-      ...image,
-      categories: image.categories.map(ci => ({
-        ...ci,
-        category: ci.category
-      }))
-    }))
-
-    return NextResponse.json(transformedImages)
+    return NextResponse.json(images)
   } catch (error) {
     console.error('Error fetching images:', error)
     return NextResponse.json({ error: 'Failed to fetch images' }, { status: 500 })
