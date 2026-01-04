@@ -15,7 +15,7 @@ async function main() {
     create: {
       email: 'admin@alens.com',
       name: 'Admin',
-      passwordHash: await bcrypt.hash('admin123', 10),
+      passwordHash: await bcrypt.hash('dd20220705', 10),
       role: 'SUPER_ADMIN'
     }
   })
