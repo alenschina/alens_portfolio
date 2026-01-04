@@ -15,7 +15,7 @@ export default withAuth(
       'Content-Security-Policy',
       [
         "default-src 'self'",
-        "img-src 'self' data: https://images.unsplash.com blob:",
+        "img-src 'self' data: https://images.unsplash.com https://*.myqcloud.com blob:",
         "style-src 'self' 'unsafe-inline'",
         "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
         "font-src 'self' data:",

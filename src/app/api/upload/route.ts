@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
 import { nanoid } from 'nanoid'
 import sharp from 'sharp'
+import { uploadToCOS, uploadThumbnail } from '@/lib/cos'
 
 // Security constants
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -95,10 +94,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create upload directory with restricted permissions
-    const uploadDir = join(process.cwd(), 'public', 'uploads')
-    await mkdir(uploadDir, { recursive: true })
-
     // Generate safe filename
     const filename = generateSafeFilename(file.name)
 
@@ -122,19 +117,33 @@ export async function POST(request: Request) {
       .jpeg({ quality: 80 })
       .toBuffer()
 
-    // Save files with safe paths
-    const originalPath = join(uploadDir, filename)
-    const thumbnailPath = join(uploadDir, `thumb-${filename}`)
+    // Upload to COS
+    let url: string
+    let thumbnailUrl: string | undefined
 
-    await writeFile(originalPath, buffer)
-    await writeFile(thumbnailPath, thumbnailBuffer)
+    try {
+      url = await uploadToCOS(buffer, filename, file.type)
+    } catch (err) {
+      console.error('Error uploading original image:', err)
+      return NextResponse.json(
+        { error: 'Failed to upload original image to COS' },
+        { status: 500 }
+      )
+    }
+
+    try {
+      thumbnailUrl = await uploadThumbnail(thumbnailBuffer, filename)
+    } catch (err) {
+      console.warn('Failed to upload thumbnail, continuing without it:', err)
+      thumbnailUrl = undefined
+    }
 
     // Get image metadata
     const metadata = await sharp(buffer).metadata()
 
     return NextResponse.json({
-      url: `/api/uploads/${filename}`,
-      thumbnailUrl: `/api/uploads/thumb-${filename}`,
+      url,
+      thumbnailUrl,
       width: metadata.width,
       height: metadata.height,
       size: buffer.length,

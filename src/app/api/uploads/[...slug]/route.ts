@@ -28,7 +28,7 @@ export async function GET(
     const uploadDir = join(process.cwd(), 'public', 'uploads')
     let filePath = join(uploadDir, filename)
 
-    // Try to find the file
+    // Try to find the file locally
     let found = false
     try {
       await readFile(filePath)
@@ -57,6 +57,12 @@ export async function GET(
     }
 
     if (!found) {
+      // File not found locally, check if we should redirect to COS
+      const cosBaseUrl = process.env.COS_BASE_URL
+      if (cosBaseUrl) {
+        // Redirect to COS URL
+        return NextResponse.redirect(`${cosBaseUrl}/${filename}`)
+      }
       return NextResponse.json({ error: 'File not found' }, { status: 404 })
     }
 

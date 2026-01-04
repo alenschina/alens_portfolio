@@ -77,12 +77,12 @@ export function ImagesByCategory({ categories, images, onEditImage, onDeleteImag
                       {/* Image Preview */}
                       <div className="aspect-video bg-gray-100 relative">
                         <img
-                          src={image.thumbnailUrl || image.originalUrl}
+                          src={image.thumbnailUrl || image.originalUrl || '/placeholder.png'}
                           alt={image.alt}
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement
-                            target.src = image.originalUrl
+                            target.src = image.originalUrl || '/placeholder.png'
                           }}
                         />
                         {/* Carousel Badge */}

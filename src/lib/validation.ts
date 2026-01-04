@@ -57,11 +57,12 @@ export function isValidImageUrl(url: string): boolean {
 
   try {
     const parsed = new URL(url)
-    // Allow Unsplash CDN and local uploads
+    // Allow Unsplash CDN, local uploads, and Tencent COS
     const allowedHosts = [
       'images.unsplash.com',
       'localhost',
-      '127.0.0.1'
+      '127.0.0.1',
+      'myqcloud.com' // Tencent COS
     ]
 
     return allowedHosts.some(host => parsed.hostname === host || parsed.hostname.endsWith(`.${host}`))

@@ -30,6 +30,7 @@
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cos-nodejs-sdk-v5": "^2.15.4",
     "lucide-react": "^0.561.0",
     "nanoid": "^5.1.6",
     "next": "^16.0.10",
