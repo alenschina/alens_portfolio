@@ -145,8 +145,16 @@ export const createNavigationSchema = z.object({
   }
 )
 
-export const updateNavigationSchema = createNavigationSchema.partial().extend({
-  id: z.string().cuid().optional()
+export const updateNavigationSchema = z.object({
+  id: z.string().cuid().optional(),
+  title: secureString(1, 100).optional(),
+  slug: secureSlug.optional(),
+  type: z.nativeEnum(NavigationType).optional(),
+  parentId: z.string().cuid().optional().nullable(),
+  categoryId: z.string().cuid().optional().nullable(),
+  externalUrl: secureUrl.optional().nullable(),
+  order: z.number().int().min(0).max(9999).optional(),
+  isVisible: z.boolean().optional()
 })
 
 // Category schemas
