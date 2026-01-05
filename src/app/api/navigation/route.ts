@@ -36,7 +36,20 @@ export async function GET(request: Request) {
       where,
       orderBy: { order: 'asc' }
     })
-    return NextResponse.json(navigation)
+
+    // Filter out navigation items where category no longer exists or is inactive
+    const filteredNavigation = navigation.map(item => ({
+      ...item,
+      // Filter out CATEGORY type items with inactive categories
+      ...(item.type === 'CATEGORY' && (!item.category || !item.category.isActive)
+        ? { isActiveFiltered: true }
+        : {}),
+      children: item.children.filter(child =>
+        child.category !== null && child.category.isActive
+      )
+    })).filter(item => !(item as any).isActiveFiltered)
+
+    return NextResponse.json(filteredNavigation)
   } catch (error) {
     console.error('Error fetching navigation:', error)
     return NextResponse.json({ error: 'Failed to fetch navigation' }, { status: 500 })

@@ -29,8 +29,8 @@ model Navigation {
   isVisible   Boolean      @default(true)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  category    Category?    @relation(fields: [categoryId], references: [id])
-  parent      Navigation?  @relation("NavigationHierarchy", fields: [parentId], references: [id])
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  parent      Navigation?  @relation("NavigationHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   children    Navigation[] @relation("NavigationHierarchy")
 }
 

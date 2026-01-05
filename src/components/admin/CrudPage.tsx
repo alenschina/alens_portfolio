@@ -18,7 +18,7 @@ interface CrudPageProps<T extends { id: string }> {
   onDelete?: (item: T) => void
   renderForm: (props: {
     item?: T
-    onSubmit: (data: any) => Promise<void>
+    onSubmit: (...args: any[]) => Promise<void>
     onCancel: () => void
     loading?: boolean
   }) => React.ReactElement
@@ -82,7 +82,7 @@ export function CrudPage<T extends { id: string }>({
     }
   }
 
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data: any, ...extraArgs: any[]) => {
     try {
       setSubmitting(true)
 
