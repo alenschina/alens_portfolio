@@ -39,6 +39,7 @@ npm run format:check  # Check formatting
 npm run test       # Vitest dev mode
 npm run test:ui    # Vitest with UI browser
 npm run test:run   # Run tests once
+npm run test:run -- src/test/validation.test.ts  # Run single test file
 npm run test:coverage  # With coverage report
 
 # Database
@@ -122,12 +123,26 @@ RESTful endpoints with Zod validation:
 ### Image Management
 - Unsplash CDN for external portfolio images
 - Local uploads in `public/uploads/`
+- Tencent COS (Cloud Object Storage) for production uploads
 - Sharp processing: auto-generate WebP thumbnails (400x300)
 - Image URLs: `/uploads/{file}` and `/uploads/thumb-{file}`
 - Carousel: @dnd-kit for drag-and-drop ordering, displayed by `carouselOrder`
+- Upload security: filename sanitization, MIME type validation, path traversal prevention
 
 ### Security Headers
 Middleware (`src/middleware.ts`) sets CSP, X-Frame-Options, HSTS, Referrer-Policy, etc.
+
+### Validation
+Zod schemas in `src/lib/validation.ts` with:
+- Security sanitization (XSS prevention, angle bracket removal)
+- Type-specific validation (navigation types, image URLs)
+- `validateRequest()` helper for API route validation
+- Password requirements: 8-128 chars, uppercase + lowercase + number
+
+### Audit Logging
+`src/lib/audit.ts` tracks admin actions:
+- Creates `audit` records with action, userId, details
+- Used in API routes for content modifications
 
 ## Default Admin Account
 ```
@@ -143,4 +158,11 @@ Password: admin123
 DATABASE_URL="file:./dev.db"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-secret-key"
+
+# Tencent COS (optional, for production uploads)
+COS_SECRET_ID=""
+COS_SECRET_KEY=""
+COS_BUCKET=""
+COS_REGION=""
+COS_BASE_URL=""
 ```
