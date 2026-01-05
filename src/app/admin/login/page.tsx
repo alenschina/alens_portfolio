@@ -29,7 +29,8 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Invalid email or password')
       } else {
-        router.push('/admin/dashboard')
+        // 强制刷新页面以更新 NextAuth 会话状态
+        window.location.href = '/admin/dashboard'
       }
     } catch (error) {
       setError('An error occurred. Please try again.')
