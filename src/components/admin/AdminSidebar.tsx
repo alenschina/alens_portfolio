@@ -27,6 +27,11 @@ const navigation = [
 export function AdminSidebar() {
   const pathname = usePathname()
 
+  // 登录页不显示侧边栏
+  if (pathname === '/admin/login') {
+    return null
+  }
+
   return (
     <div className="w-64 bg-white shadow-lg">
       <div className="p-6">
