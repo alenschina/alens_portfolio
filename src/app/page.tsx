@@ -198,7 +198,7 @@ export default function Home() {
                         onClick={() => toggleCategory(item.slug)}
                         className="w-full flex items-center justify-between text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black transition-colors group"
                       >
-                        <span>{item.title}</span>
+                        <span className="whitespace-pre">{item.title}</span>
                         <svg
                           width="12"
                           height="12"
