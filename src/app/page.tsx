@@ -168,20 +168,19 @@ export default function Home() {
 
           {/* 导航菜单 */}
           <nav className="mt-24 flex-shrink-0 font-sans">
-            <ul className="space-y-6 w-full">
+            <ul className="space-y-6">
               {navigation.map((item) => {
                 if (item.type === "CATEGORY") {
                   const categorySlug = item.category?.slug || item.slug;
                   return (
-                    <li key={item.id} className="flex justify-center">
+                    <li key={item.id}>
                       <button
                         onClick={() => handleCategorySelect(categorySlug)}
-                        className={`w-full max-w-[160px] text-center transition-colors ${
+                        className={`text-left transition-colors ${
                           selectedCategory === categorySlug
-                            ? "text-black font-bold text-[13px] tracking-[0.15em]"
-                            : "text-gray-600 text-[11px] tracking-[0.15em] hover:text-black"
+                            ? "text-black font-bold text-[13px] uppercase tracking-[0.15em]"
+                            : "text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black"
                         }`}
-                        style={{ textAlignLast: 'justify' }}
                       >
                         {item.title}
                       </button>
@@ -194,19 +193,18 @@ export default function Home() {
                 ) {
                   const isExpanded = expandedCategories[item.slug] || false;
                   return (
-                    <li key={item.id} className="flex justify-center">
+                    <li key={item.id}>
                       <button
                         onClick={() => toggleCategory(item.slug)}
-                        className="w-full max-w-[160px] flex items-center justify-between text-gray-600 text-[11px] tracking-[0.15em] hover:text-black transition-colors group"
-                        style={{ textAlignLast: 'justify' }}
+                        className="w-full flex items-center justify-between text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black transition-colors group"
                       >
-                        <span className="flex-1">{item.title}</span>
+                        <span>{item.title}</span>
                         <svg
                           width="12"
                           height="12"
                           viewBox="0 0 12 12"
                           fill="none"
-                          className={`transition-transform duration-300 flex-shrink-0 ${
+                          className={`transition-transform duration-300 ${
                             isExpanded ? "rotate-90" : ""
                           }`}
                         >
@@ -231,17 +229,16 @@ export default function Home() {
                             const childCategorySlug =
                               child.category?.slug || child.slug;
                             return (
-                              <li key={child.id} className="flex justify-center">
+                              <li key={child.id}>
                                 <button
                                   onClick={() =>
                                     handleCategorySelect(childCategorySlug)
                                   }
-                                  className={`w-full max-w-[140px] text-center transition-colors ${
+                                  className={`text-left transition-colors ${
                                     selectedCategory === childCategorySlug
-                                      ? "text-black font-bold text-[10px] tracking-[0.12em]"
-                                      : "text-gray-500 text-[10px] tracking-[0.1em] hover:text-black"
-                                  }`}
-                                  style={{ textAlignLast: 'justify' }}
+                                      ? "text-black font-bold text-[10px] uppercase tracking-[0.12em]"
+                                      : "text-gray-500 text-[10px] uppercase tracking-[0.1em] hover:text-black"
+                                  } block py-1 w-full`}
                                 >
                                   {child.title}
                                 </button>
@@ -261,17 +258,16 @@ export default function Home() {
                     ? selectedCategory === "contact"
                     : false;
                   return (
-                    <li key={item.id} className="flex justify-center">
+                    <li key={item.id}>
                       <button
                         onClick={() =>
                           handleCategorySelect(item.slug || "about")
                         }
-                        className={`w-full max-w-[160px] text-center transition-colors ${
+                        className={`w-full flex items-center justify-between text-left transition-colors ${
                           isActive
-                            ? "text-black font-bold text-[11px] tracking-[0.15em]"
-                            : "text-gray-600 text-[11px] tracking-[0.15em] hover:text-black"
+                            ? "text-black font-bold text-[11px] uppercase tracking-[0.15em]"
+                            : "text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black"
                         }`}
-                        style={{ textAlignLast: 'justify' }}
                       >
                         {item.title}
                       </button>
