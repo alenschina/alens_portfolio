@@ -176,7 +176,7 @@ export default function Home() {
                     <li key={item.id}>
                       <button
                         onClick={() => handleCategorySelect(categorySlug)}
-                        className={`text-left transition-colors ${
+                        className={`whitespace-pre text-left transition-colors ${
                           selectedCategory === categorySlug
                             ? "text-black font-bold text-[13px] uppercase tracking-[0.15em]"
                             : "text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black"
@@ -263,7 +263,7 @@ export default function Home() {
                         onClick={() =>
                           handleCategorySelect(item.slug || "about")
                         }
-                        className={`w-full flex items-center justify-between text-left transition-colors ${
+                        className={`whitespace-pre w-full flex items-center justify-between text-left transition-colors ${
                           isActive
                             ? "text-black font-bold text-[11px] uppercase tracking-[0.15em]"
                             : "text-gray-600 text-[11px] uppercase tracking-[0.15em] hover:text-black"
