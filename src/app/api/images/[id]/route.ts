@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { updateImageSchema } from '@/lib/validation'
+import { deleteFromCOS } from '@/lib/cos'
 import { z } from 'zod'
 
 export async function GET(
@@ -106,9 +107,31 @@ export async function DELETE(
 
     const { id } = await params
 
+    // 1. 获取图片信息
+    const image = await prisma.image.findUnique({
+      where: { id }
+    })
+
+    if (!image) {
+      return NextResponse.json({ error: 'Image not found' }, { status: 404 })
+    }
+
+    // 2. 先删除数据库记录
     await prisma.image.delete({
       where: { id }
     })
+
+    // 3. 后删除 COS 文件（失败只警告）
+    try {
+      const filename = image.originalUrl.split('/').pop()!
+      await deleteFromCOS(filename)
+      if (image.thumbnailUrl) {
+        const thumbFilename = image.thumbnailUrl.split('/').pop()!
+        await deleteFromCOS(thumbFilename)
+      }
+    } catch (err) {
+      console.warn('Failed to delete files from COS:', err)
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

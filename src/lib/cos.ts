@@ -57,3 +57,48 @@ export async function uploadThumbnail(
   const thumbnailFilename = `thumb-${filename}`
   return uploadToCOS(buffer, thumbnailFilename, 'image/jpeg')
 }
+
+/**
+ * Delete a file from COS
+ * @param filename - The filename to delete (e.g., "abc123.jpg")
+ */
+export async function deleteFromCOS(filename: string): Promise<void> {
+  const bucket = process.env.COS_BUCKET!
+  const region = process.env.COS_REGION!
+
+  return new Promise((resolve, reject) => {
+    cos.deleteObject({
+      Bucket: bucket,
+      Region: region,
+      Key: filename,
+    }, (err) => {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve()
+    })
+  })
+}
+
+/**
+ * List all files in COS bucket
+ * @returns Array of file keys
+ */
+export async function listCOSFiles(): Promise<string[]> {
+  const bucket = process.env.COS_BUCKET!
+  const region = process.env.COS_REGION!
+
+  return new Promise((resolve, reject) => {
+    cos.getBucket({
+      Bucket: bucket,
+      Region: region,
+    }, (err, data) => {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve(data.Contents?.map(item => item.Key!) || [])
+    })
+  })
+}
