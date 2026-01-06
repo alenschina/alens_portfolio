@@ -112,8 +112,16 @@ export async function POST(request: Request) {
       )
     }
 
+    // Compress main image (keep original resolution, reduce file size)
+    let processedBuffer: Buffer = buffer
+    if (['image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
+      processedBuffer = Buffer.from(await sharp(buffer).jpeg({ quality: 80 }).toBuffer())
+    } else if (file.type === 'image/png') {
+      processedBuffer = Buffer.from(await sharp(buffer).png({ compressionLevel: 9 }).toBuffer())
+    }
+
     // Generate thumbnail
-    const thumbnailBuffer = await sharp(buffer)
+    const thumbnailBuffer = await sharp(processedBuffer)
       .resize(400, 300, { fit: 'cover' })
       .jpeg({ quality: 80 })
       .toBuffer()
@@ -123,7 +131,7 @@ export async function POST(request: Request) {
     let thumbnailUrl: string | undefined
 
     try {
-      url = await uploadToCOS(buffer, filename, file.type)
+      url = await uploadToCOS(processedBuffer, filename, file.type)
     } catch (err) {
       console.error('Error uploading original image:', err)
       return NextResponse.json(
@@ -144,7 +152,7 @@ export async function POST(request: Request) {
       thumbnailUrl,
       width: metadata.width,
       height: metadata.height,
-      size: buffer.length,
+      size: processedBuffer.length,
       mimeType: file.type,
       alt: file.name.replace(/\.[^/.]+$/, '') // Generate alt from filename
     })
