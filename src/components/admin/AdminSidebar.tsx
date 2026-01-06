@@ -11,7 +11,8 @@ import {
   Activity,
   LogOut,
   User,
-  Mail
+  Mail,
+  Trash2
 } from 'lucide-react'
 
 const navigation = [
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'About', href: '/admin/about', icon: User },
   { name: 'Contact', href: '/admin/contact', icon: Mail },
   { name: 'Performance', href: '/admin/performance', icon: Activity },
+  { name: 'Cleanup', href: '/admin/cleanup', icon: Trash2 },
 ]
 
 export function AdminSidebar() {
