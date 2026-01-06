@@ -6,7 +6,7 @@ import sharp from 'sharp'
 import { uploadToCOS, uploadThumbnail } from '@/lib/cos'
 
 // Security constants
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 const ALLOWED_MIME_TYPES = [
   'image/jpeg',
   'image/jpg',

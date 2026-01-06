@@ -36,7 +36,7 @@ export function useFileUpload(options: UseFileUploadOptions = {}): UseFileUpload
     onSuccess,
     onError,
     accept = 'image/*',
-    maxSize = 10 * 1024 * 1024 // 10MB default
+    maxSize = 50 * 1024 * 1024 // 50MB default
   } = options
 
   const [uploading, setUploading] = useState(false)
