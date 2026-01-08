@@ -29,7 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm run dev        # Dev server at http://localhost:3000
-npm run build      # Production build
+npm run build      # Production build (includes copy-assets.js)
 npm run start      # Run production build
 npm run lint       # ESLint with auto-fix
 npm run format     # Prettier auto-format
