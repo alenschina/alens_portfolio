@@ -15,6 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Framework**: Next.js 16.0.10 with App Router
 - **Language**: TypeScript (strict mode)
+- **Runtime**: React 19.2.1
 - **Database**: SQLite + Prisma ORM v6.19.1
 - **Auth**: NextAuth.js v4 with JWT sessions
 - **Styling**: Tailwind CSS v4
@@ -78,12 +79,15 @@ src/
 │   ├── useCategorySelection.ts  # Category state management
 │   └── usePerformanceMonitor.ts # Performance tracking
 ├── lib/
-│   ├── prisma.ts        # Prisma client singleton
-│   ├── auth.ts          # NextAuth config
-│   ├── api-client.ts    # API helpers
-│   ├── audit.ts         # Admin action logging
-│   ├── error-handler.ts # Error boundary helpers
-│   └── validation.ts    # Zod schemas
+│   ├── prisma.ts           # Prisma client singleton
+│   ├── auth.ts             # NextAuth config
+│   ├── api-client.ts       # API helpers with retry
+│   ├── api-error-handler.ts # API error handling
+│   ├── audit.ts            # Admin action logging
+│   ├── cos.ts              # Tencent COS integration
+│   ├── error-handler.ts    # Error boundary helpers
+│   ├── performance-monitor.ts # Web Vitals tracking
+│   └── validation.ts       # Zod schemas
 └── middleware.ts        # Auth + security headers
 ```
 
@@ -120,6 +124,11 @@ RESTful endpoints with Zod validation:
 - **SWR** for client-side caching (`useNavigation`, `useImagesByCategory`)
 - Custom hooks in `src/hooks/useApi.ts`
 
+### API Client
+- `src/lib/api-client.ts`: HTTP client with retry mechanism (3 attempts, exponential backoff)
+- `src/lib/api-error-handler.ts`: Error handling with status-specific messages
+- Supports file uploads with progress tracking
+
 ### Image Management
 - Unsplash CDN for external portfolio images
 - Local uploads in `public/uploads/`
@@ -128,9 +137,17 @@ RESTful endpoints with Zod validation:
 - Image URLs: `/uploads/{file}` and `/uploads/thumb-{file}`
 - Carousel: @dnd-kit for drag-and-drop ordering, displayed by `carouselOrder`
 - Upload security: filename sanitization, MIME type validation, path traversal prevention
+- Cleanup: Automatic COS file deletion when images are removed; Cleanup menu for orphaned files
 
 ### Security Headers
 Middleware (`src/middleware.ts`) sets CSP, X-Frame-Options, HSTS, Referrer-Policy, etc.
+
+### Performance Monitoring
+`src/lib/performance-monitor.ts` tracks Web Vitals (FCP, LCP, CLS, TTFB, INP) with:
+- Console and localStorage reporting in development
+- Custom metric tracking and execution time measurement
+- Long task observation (>50ms)
+- Performance data export capability
 
 ### Validation
 Zod schemas in `src/lib/validation.ts` with:
