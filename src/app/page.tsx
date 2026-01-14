@@ -488,7 +488,7 @@ export default function Home() {
 
               {/* 缩略图列表 - 仅在非首页显示 */}
               {selectedCategory !== "home" && images.length > 0 && (
-                <div className="h-16 border-t border-gray-200 pt-3 w-full flex-shrink-0 max-w-[105%] mx-auto">
+                <div className="h-16 mt-3 border-t border-gray-200 pt-3 w-full flex-shrink-0 max-w-[105%] mx-auto">
                   <div ref={thumbnailRef} className="flex gap-2 overflow-x-auto h-full w-full scrollbar-hide items-center">
                     {images.map((image, index) => (
                       <button
