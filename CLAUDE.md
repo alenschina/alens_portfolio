@@ -83,7 +83,7 @@ src/
 │   ├── auth.ts             # NextAuth config
 │   ├── api-client.ts       # API helpers with retry
 │   ├── api-error-handler.ts # API error handling
-│   ├── audit.ts            # Admin action logging
+│   ├── audit.ts            # Admin action logging (console only)
 │   ├── cos.ts              # Tencent COS integration
 │   ├── error-handler.ts    # Error boundary helpers
 │   ├── performance-monitor.ts # Web Vitals tracking
@@ -99,7 +99,7 @@ src/
 2. **Navigation** - Multi-level menu (self-referencing parentId, supports LINK/CATEGORY/PARENT/EXTERNAL types)
 3. **Category** - Image categories with slug, coverImage, order
 4. **Image** - Portfolio images with metadata, thumbnail, order
-5. **CategoryImage** - Many-to-many join table with carousel support (isCarousel, carouselOrder)
+5. **CategoryImage** - Many-to-many join table with carousel support (isCarousel, carouselOrder, order)
 6. **Settings** - Key-value store for site settings
 
 ## Key Architecture
@@ -123,10 +123,18 @@ RESTful endpoints with Zod validation:
 ### Data Fetching
 - **SWR** for client-side caching (`useNavigation`, `useImagesByCategory`)
 - Custom hooks in `src/hooks/useApi.ts`
+- Three cache strategies in `CACHE_CONFIG`:
+  - `STATIC`: 1 hour revalidation (navigation, categories)
+  - `DYNAMIC`: 5 minutes revalidation (images)
+  - `REALTIME`: 30 seconds revalidation (live data)
 
 ### API Client
 - `src/lib/api-client.ts`: HTTP client with retry mechanism (3 attempts, exponential backoff)
 - `src/lib/api-error-handler.ts`: Error handling with status-specific messages
+  - 401 triggers redirect to login
+  - 403 shows permission denied
+  - 404 shows not found
+  - 500 shows server error
 - Supports file uploads with progress tracking
 
 ### Image Management
@@ -134,9 +142,11 @@ RESTful endpoints with Zod validation:
 - Local uploads in `public/uploads/`
 - Tencent COS (Cloud Object Storage) for production uploads
 - Sharp processing: auto-generate WebP thumbnails (400x300)
-- Image URLs: `/uploads/{file}` and `/uploads/thumb-{file}`
+- Image URL patterns:
+  - Original: `{cosBaseUrl}/{filename}` or `/uploads/{filename}`
+  - Thumbnail: `{cosBaseUrl}/thumb-{filename}` or `/uploads/thumb-{filename}`
 - Carousel: @dnd-kit for drag-and-drop ordering, displayed by `carouselOrder`
-- Upload security: filename sanitization, MIME type validation, path traversal prevention
+- Upload security: filename sanitization, MIME type validation, path traversal prevention, Sharp image verification
 - Cleanup: Automatic COS file deletion when images are removed; Cleanup menu for orphaned files
 
 ### Security Headers
@@ -155,22 +165,21 @@ Zod schemas in `src/lib/validation.ts` with:
 - Type-specific validation (navigation types, image URLs)
 - `validateRequest()` helper for API route validation
 - Password requirements: 8-128 chars, uppercase + lowercase + number
+- Slug validation: lowercase, numbers, hyphens only (kebab-case)
 
 ### Audit Logging
 `src/lib/audit.ts` tracks admin actions:
-- Creates `audit` records with action, userId, details
-- Used in API routes for content modifications
+- Logs to console only (AuditLog model not yet in database schema)
+- Action types: USER_*, IMAGE_*, CATEGORY_*, NAVIGATION_*, FILE_UPLOAD, etc.
+- Captures IP address and user agent from requests
 
-## Default Admin Account
-```
-Email: admin@alens.com
-Password: admin123
-```
+### Testing
+- **Framework**: Vitest with @testing-library/react
+- **DOM Environment**: happy-dom (default), jsdom available for complex DOM tests
+- **Coverage**: @vitest/coverage-v8
+- Test files located in `src/test/` directory
 
-## Path Aliases
-`@/*` maps to `./src/*`
-
-## Environment Variables (.env)
+### Environment Variables (.env)
 ```
 DATABASE_URL="file:./dev.db"
 NEXTAUTH_URL="http://localhost:3000"
@@ -183,3 +192,12 @@ COS_BUCKET=""
 COS_REGION=""
 COS_BASE_URL=""
 ```
+
+## Default Admin Account
+```
+Email: admin@alens.com
+Password: admin123
+```
+
+## Path Aliases
+`@/*` maps to `./src/*`
