@@ -15,7 +15,10 @@
       "Bash(npm run build)",
       "Bash(npm pkg set:*)",
       "Bash(ls:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run test:run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

@@ -100,8 +100,8 @@ const secureImageUrl = z.string()
 
 // Slug validation
 const secureSlug = z.string()
-  .refine(isValidSlug, 'Invalid slug format (use lowercase, numbers, and hyphens)')
   .transform(sanitizeString)
+  .refine(isValidSlug, 'Invalid slug format (use lowercase, numbers, and hyphens)')
 
 // Email validation
 const secureEmail = z.string()

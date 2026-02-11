@@ -62,6 +62,7 @@ vi.mock('@/lib/prisma', () => ({
     },
     categoryImage: {
       findMany: vi.fn(),
+      findFirst: vi.fn(),
       create: vi.fn(),
       deleteMany: vi.fn(),
     },

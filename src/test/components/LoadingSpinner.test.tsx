@@ -16,21 +16,21 @@ describe('LoadingSpinner Component', () => {
 
       const spinner = screen.getByRole('status')
       expect(spinner).toBeInTheDocument()
-      expect(spinner.firstChild).toHaveClass('h-4', 'w-4')
+      expect(spinner).toHaveClass('h-4', 'w-4')
     })
 
     it('should render with default size explicitly', () => {
       render(<LoadingSpinner size="default" />)
 
       const spinner = screen.getByRole('status')
-      expect(spinner.firstChild).toHaveClass('h-8', 'w-8')
+      expect(spinner).toHaveClass('h-8', 'w-8')
     })
 
     it('should render with large size', () => {
       render(<LoadingSpinner size="large" />)
 
       const spinner = screen.getByRole('status')
-      expect(spinner.firstChild).toHaveClass('h-12', 'w-12')
+      expect(spinner).toHaveClass('h-12', 'w-12')
     })
 
     it('should have correct accessibility attributes', () => {
@@ -49,14 +49,14 @@ describe('LoadingSpinner Component', () => {
     it('should have spinner animation class', () => {
       render(<LoadingSpinner />)
 
-      const spinner = screen.getByRole('status').firstChild as HTMLElement
+      const spinner = screen.getByRole('status')
       expect(spinner).toHaveClass('animate-spin')
     })
 
     it('should have border style classes', () => {
       render(<LoadingSpinner />)
 
-      const spinner = screen.getByRole('status').firstChild as HTMLElement
+      const spinner = screen.getByRole('status')
       expect(spinner).toHaveClass('rounded-full', 'border-b-2', 'border-gray-900')
     })
 
@@ -93,24 +93,22 @@ describe('LoadingSpinner Component', () => {
 
   describe('LoadingCard', () => {
     it('should render with pulse animation', () => {
-      render(<LoadingCard />)
+      const { container } = render(<LoadingCard />)
 
-      const pulseContainer = screen.getByText('').parentElement
-      expect(pulseContainer).toHaveClass('animate-pulse')
+      expect(container.firstChild).toHaveClass('animate-pulse')
     })
 
     it('should have skeleton placeholder', () => {
-      render(<LoadingCard />)
+      const { container } = render(<LoadingCard />)
 
-      const skeleton = screen.getByText('').firstChild as HTMLElement
-      expect(skeleton).toHaveClass('h-32', 'bg-gray-200', 'rounded')
+      const skeleton = container.querySelector('.h-32.bg-gray-200.rounded')
+      expect(skeleton).toBeInTheDocument()
     })
 
     it('should be wrapped in a div', () => {
-      render(<LoadingCard />)
+      const { container } = render(<LoadingCard />)
 
-      const container = screen.getByText('').parentElement
-      expect(container?.tagName).toBe('DIV')
+      expect(container.firstChild?.tagName).toBe('DIV')
     })
   })
 })
