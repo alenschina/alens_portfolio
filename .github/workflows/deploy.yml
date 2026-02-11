@@ -1,0 +1,132 @@
+name: Deploy to Tencent Server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build application
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
+          COS_SECRET_KEY: ${{ secrets.COS_SECRET_KEY }}
+          COS_BUCKET: ${{ secrets.COS_BUCKET }}
+          COS_REGION: ${{ secrets.COS_REGION }}
+          COS_BASE_URL: ${{ secrets.COS_BASE_URL }}
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/var/www/alens-portfolio' }}
+        run: |
+          echo "🚀 开始部署到服务器..."
+
+          # 创建部署目录
+          ssh $SSH_USER@$SSH_HOST "mkdir -p $DEPLOY_PATH"
+
+          # 同步构建文件到服务器
+          echo "📦 同步文件到服务器..."
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='prisma/dev.db' \
+            ./ $SSH_USER@$SSH_HOST:$DEPLOY_PATH/
+
+          # 在服务器上执行部署命令
+          echo "🔧 在服务器上执行部署..."
+          ssh $SSH_USER@$SSH_HOST << EOF
+            cd $DEPLOY_PATH
+
+            # 安装生产依赖
+            echo "📥 安装依赖..."
+            npm ci --production
+
+            # 生成 Prisma Client
+            echo "🗄️ 生成 Prisma Client..."
+            npx prisma generate
+
+            # 执行数据库迁移
+            echo "🔄 执行数据库迁移..."
+            npx prisma migrate deploy
+
+            # 创建或更新环境变量文件
+            echo "⚙️ 更新环境变量..."
+            cat > .env << EOL
+          DATABASE_URL="${{ secrets.DATABASE_URL }}"
+          NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}"
+          NEXTAUTH_URL="${{ secrets.NEXTAUTH_URL }}"
+          COS_SECRET_ID="${{ secrets.COS_SECRET_ID }}"
+          COS_SECRET_KEY="${{ secrets.COS_SECRET_KEY }}"
+          COS_BUCKET="${{ secrets.COS_BUCKET }}"
+          COS_REGION="${{ secrets.COS_REGION }}"
+          COS_BASE_URL="${{ secrets.COS_BASE_URL }}"
+          EOL
+
+            # 使用 PM2 重启应用
+            echo "🔄 重启应用..."
+            if pm2 list | grep -q "alens-portfolio"; then
+              pm2 reload alens-portfolio --update-env
+            else
+              pm2 start npm --name "alens-portfolio" -- start
+              pm2 save
+            fi
+
+            echo "✅ 部署完成！"
+          EOF
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ 部署成功！"
+          echo "应用地址: ${{ secrets.NEXTAUTH_URL }}"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ 部署失败！"
