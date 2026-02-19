@@ -5,6 +5,11 @@ import { nanoid } from 'nanoid'
 import sharp from 'sharp'
 import { uploadToCOS, uploadThumbnail } from '@/lib/cos'
 
+export const runtime = 'nodejs'
+export const bodyParser = {
+  sizeLimit: '60mb',
+}
+
 // Security constants
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 const ALLOWED_MIME_TYPES = [
