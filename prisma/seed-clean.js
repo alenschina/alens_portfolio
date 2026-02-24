@@ -10,12 +10,12 @@ async function main() {
   // 创建默认管理员
   console.log('创建默认管理员账户...')
   const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@alens.com' },
+    where: { email: 'alens_china@126.com' },
     update: {},
     create: {
-      email: 'admin@alens.com',
+      email: 'alens_china@126.com',
       name: 'Admin',
-      passwordHash: await bcrypt.hash('dd20220705', 10),
+      passwordHash: await bcrypt.hash('admin20220705', 10),
       role: 'SUPER_ADMIN'
     }
   })
@@ -29,7 +29,7 @@ async function main() {
     where: { slug: 'home' },
     update: {},
     create: {
-      title: 'HOME',
+      title: '首  页',
       slug: 'home',
       type: 'CATEGORY',
       order: 0
@@ -37,11 +37,11 @@ async function main() {
   })
 
   const portfolioNav = await prisma.navigation.upsert({
-    where: { slug: 'portfolio' },
+    where: { slug: 'category' },
     update: {},
     create: {
-      title: 'PORTFOLIO',
-      slug: 'portfolio',
+      title: '分  类',
+      slug: 'category',
       type: 'PARENT',
       order: 1
     }
@@ -51,7 +51,7 @@ async function main() {
     where: { slug: 'works' },
     update: {},
     create: {
-      title: 'WORKS',
+      title: '作品集',
       slug: 'works',
       type: 'PARENT',
       order: 2
@@ -62,7 +62,7 @@ async function main() {
     where: { slug: 'about' },
     update: {},
     create: {
-      title: 'ABOUT',
+      title: '关  于',
       slug: 'about',
       type: 'LINK',
       order: 3
@@ -73,7 +73,7 @@ async function main() {
     where: { slug: 'contact' },
     update: {},
     create: {
-      title: 'CONTACT',
+      title: '联  系',
       slug: 'contact',
       type: 'LINK',
       order: 4
@@ -89,55 +89,6 @@ async function main() {
       slug: 'home',
       navId: homeNav.id,
       order: 0
-    },
-    {
-      name: 'Architecture',
-      slug: 'portfolio-architecture',
-      navTitle: 'ARCHITECTURE',
-      parentNavId: portfolioNav.id,
-      order: 0
-    },
-    {
-      name: 'Landscape',
-      slug: 'portfolio-landscape',
-      navTitle: 'LANDSCAPE',
-      parentNavId: portfolioNav.id,
-      order: 1
-    },
-    {
-      name: 'Portrait',
-      slug: 'portfolio-portrait',
-      navTitle: 'PORTRAIT',
-      parentNavId: portfolioNav.id,
-      order: 2
-    },
-    {
-      name: 'Street Photography',
-      slug: 'portfolio-street',
-      navTitle: 'STREET PHOTOGRAPHY',
-      parentNavId: portfolioNav.id,
-      order: 3
-    },
-    {
-      name: 'Urban Perspectives',
-      slug: 'works-urban',
-      navTitle: 'URBAN PERSPECTIVES',
-      parentNavId: worksNav.id,
-      order: 0
-    },
-    {
-      name: "Nature's Light",
-      slug: 'works-nature',
-      navTitle: "NATURE'S LIGHT",
-      parentNavId: worksNav.id,
-      order: 1
-    },
-    {
-      name: 'Human Stories',
-      slug: 'works-human',
-      navTitle: 'HUMAN STORIES',
-      parentNavId: worksNav.id,
-      order: 2
     }
   ]
 
@@ -174,8 +125,8 @@ async function main() {
 
   console.log('✅ 种子数据初始化完成（无图片）!')
   console.log('默认管理员账户:')
-  console.log('  邮箱: admin@alens.com')
-  console.log('  密码: admin123')
+  console.log('  邮箱: alens_china@126.com')
+  console.log('  密码: admin20220705')
   console.log('\n注意: 图片数据需要通过后台管理界面上传或自行添加')
 }
 

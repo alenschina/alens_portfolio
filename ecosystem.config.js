@@ -1,15 +1,16 @@
 module.exports = {
   apps: [{
-    name: 'alens-portfolio',
+    name: 'alens_portfolio',
     script: 'npm',
     args: 'start',
-    cwd: process.env.DEPLOY_PATH || '/var/www/alens-portfolio',
+    cwd: '/var/www/alens_portfolio',
     instances: 1,
     autorestart: true,
     watch: false,
     max_memory_restart: '1G',
     env: {
       NODE_ENV: 'production',
+      DATABASE_URL: 'file:./prod.db',
       PORT: 3000,
     },
     // Log configuration

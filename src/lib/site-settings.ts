@@ -18,10 +18,14 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   try {
     const settings = await prisma.settings.findMany()
 
+    console.log('[SiteSettings] Fetched settings from DB:', settings.length, 'records')
+
     const settingsMap = settings.reduce((acc, setting) => {
       acc[setting.key] = setting.value
       return acc
     }, {} as Record<string, string>)
+
+    console.log('[SiteSettings] Settings map:', settingsMap)
 
     return {
       siteName: settingsMap.siteName || DEFAULT_SETTINGS.siteName,
