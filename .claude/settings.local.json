@@ -18,7 +18,8 @@
       "Bash(cat:*)",
       "Bash(npm run test:run:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(dir:*)"
     ]
   }
 }

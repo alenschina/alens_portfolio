@@ -44,9 +44,11 @@ npm run test:run -- src/test/validation.test.ts  # Run single test file
 npm run test:coverage  # With coverage report
 
 # Database
-npx prisma studio  # GUI database editor
-npx prisma generate  # Generate Prisma Client
-node prisma/seed.js  # Seed initial data
+npx prisma migrate dev --name init  # Initialize database
+npx prisma studio                   # GUI database editor
+npx prisma generate                 # Generate Prisma Client
+npx prisma migrate dev              # Create migration
+node prisma/seed.js                 # Seed initial data
 ```
 
 ## Project Structure
@@ -59,19 +61,27 @@ src/
 │   │   ├── dashboard/   # Statistics
 │   │   ├── navigation/  # Nav management
 │   │   ├── categories/  # Category CRUD
-│   │   └── images/      # Image library
+│   │   ├── images/      # Image library
+│   │   ├── about/       # About page editor
+│   │   ├── contact/     # Contact page editor
+│   │   ├── cleanup/     # Orphaned file cleanup
+│   │   └── performance/ # Performance monitoring panel
 │   ├── api/             # REST API endpoints
 │   │   ├── auth/[...nextauth]/
 │   │   ├── navigation/
 │   │   ├── categories/
 │   │   ├── images/
-│   │   └── upload/
+│   │   ├── upload/
+│   │   ├── about/
+│   │   ├── contact/
+│   │   └── admin/cleanup/
 │   ├── layout.tsx       # Root layout
 │   └── page.tsx         # Public homepage
 ├── components/
 │   ├── ui/              # shadcn/ui components
 │   ├── admin/           # Admin components
-│   └── error/           # Error boundary/handler
+│   ├── error/           # Error boundary/handler
+│   └── performance/     # Performance UI components
 ├── hooks/               # Custom React hooks
 │   ├── useApi.ts        # SWR data fetching hooks
 │   ├── useCrud.ts       # CRUD operations
@@ -87,8 +97,11 @@ src/
 │   ├── cos.ts              # Tencent COS integration
 │   ├── error-handler.ts    # Error boundary helpers
 │   ├── performance-monitor.ts # Web Vitals tracking
-│   └── validation.ts       # Zod schemas
-└── middleware.ts        # Auth + security headers
+│   ├── validation.ts       # Zod schemas
+│   └── utils.ts            # Utility functions (cn, etc.)
+├── types/
+│   └── index.ts            # Centralized TypeScript types
+└── middleware.ts           # Auth + security headers (Next.js)
 ```
 
 ## Database Schema
@@ -112,13 +125,15 @@ src/
 
 ### API Design
 RESTful endpoints with Zod validation:
-- `GET/POST/PUT/DELETE /api/navigation`
-- `GET/POST/PUT/DELETE /api/categories`
-- `GET/POST/PUT/DELETE /api/images`
-- `GET /api/images/by-category?slug={slug}`
+- `GET/POST/PUT/DELETE /api/navigation` - Navigation CRUD
+- `GET/POST/PUT/DELETE /api/categories` - Category CRUD
+- `GET/POST/PUT/DELETE /api/images` - Image CRUD
+- `GET /api/images/by-category?slug={slug}` - Get images by category slug
 - `POST /api/upload` - Multipart file upload with Sharp processing
-- `GET /api/about`, `GET /api/contact` - Public content pages
+- `GET/POST /api/about` - About page data
+- `GET/POST /api/contact` - Contact page data
 - `GET /api/uploads/[...slug]` - Serve uploaded files
+- `POST /api/admin/cleanup/orphan-files` - Clean orphaned COS files
 
 ### Data Fetching
 - **SWR** for client-side caching (`useNavigation`, `useImagesByCategory`)
@@ -167,6 +182,12 @@ Zod schemas in `src/lib/validation.ts` with:
 - Password requirements: 8-128 chars, uppercase + lowercase + number
 - Slug validation: lowercase, numbers, hyphens only (kebab-case)
 
+### Utility Functions
+`src/lib/utils.ts` exports common utilities:
+- `cn()` - Tailwind class merging utility (uses clsx + tailwind-merge)
+- `formatDate()` - Date formatting helper
+- Other shared helper functions
+
 ### Audit Logging
 `src/lib/audit.ts` tracks admin actions:
 - Logs to console only (AuditLog model not yet in database schema)
@@ -177,7 +198,9 @@ Zod schemas in `src/lib/validation.ts` with:
 - **Framework**: Vitest with @testing-library/react
 - **DOM Environment**: happy-dom (default), jsdom available for complex DOM tests
 - **Coverage**: @vitest/coverage-v8
-- Test files located in `src/test/` directory
+- **Test files**: Located in `src/test/` directory with pattern `*.test.ts`
+- **Setup**: `src/test/setup.ts` configures testing environment
+- **Single test**: `npm run test:run -- src/test/validation.test.ts`
 
 ### Environment Variables (.env)
 ```
@@ -201,3 +224,13 @@ Password: admin123
 
 ## Path Aliases
 `@/*` maps to `./src/*`
+
+## Type System
+All TypeScript types are centralized in `src/types/index.ts`:
+- **Core entities**: `NavigationItem`, `Category`, `Image`, `CategoryImage`, `User`
+- **Enums**: `NavigationType` (LINK/CATEGORY/PARENT/EXTERNAL), `UserRole` (ADMIN/SUPER_ADMIN)
+- **API types**: `ApiListResponse`, `ApiSingleResponse`, `ApiErrorResponse`, `PaginationInfo`
+- **Form types**: `CreateNavigationData`, `CreateCategoryData`, `CreateImageData`, etc.
+- **Component props**: `ImageCarouselProps`, `NavigationMenuProps`, `ImageGalleryProps`
+
+Types are organized by domain and re-exported from `src/types/index.ts` for clean imports.

@@ -12,7 +12,8 @@ import {
   LogOut,
   User,
   Mail,
-  Trash2
+  Trash2,
+  Settings
 } from 'lucide-react'
 
 const navigation = [
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Images', href: '/admin/images', icon: Image },
   { name: 'About', href: '/admin/about', icon: User },
   { name: 'Contact', href: '/admin/contact', icon: Mail },
+  { name: 'Site Settings', href: '/admin/site-settings', icon: Settings },
   { name: 'Performance', href: '/admin/performance', icon: Activity },
   { name: 'Cleanup', href: '/admin/cleanup', icon: Trash2 },
 ]

@@ -173,3 +173,28 @@ export function useContact() {
     mutate
   }
 }
+
+// Site settings type
+export interface SiteSettingsData {
+  siteName: string
+  siteDescription: string
+}
+
+// Site settings hook
+export function useSiteSettings() {
+  const { data, error, isLoading, mutate } = useSWR<SiteSettingsData>(
+    '/api/site-settings',
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000
+    }
+  )
+
+  return {
+    settings: data,
+    isLoading,
+    isError: error,
+    mutate
+  }
+}

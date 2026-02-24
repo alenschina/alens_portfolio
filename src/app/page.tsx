@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { ErrorBoundary } from "@/components/error/ErrorBoundary";
-import { useNavigation, useImagesByCategory, useAbout, useContact } from "@/hooks/useApi";
+import { useNavigation, useImagesByCategory, useAbout, useContact, useSiteSettings } from "@/hooks/useApi";
 import { getErrorMessage } from "@/lib/error-handler";
 
 export default function Home() {
+  const { settings: siteSettings } = useSiteSettings()
   const [currentImage, setCurrentImage] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("home");
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
@@ -130,7 +131,7 @@ export default function Home() {
         <header className="lg:hidden w-full p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold text-black tracking-tight">
-              ALENS FOTO
+              {siteSettings?.siteName || 'ALENS Photography'}
             </h1>
             <button
               className="p-2 text-gray-600 hover:text-black transition-colors"
@@ -159,10 +160,10 @@ export default function Home() {
           {/* 摄影师姓名 */}
           <div className="flex-shrink-0">
             <h1 className="text-[42px] font-bold text-black leading-[0.95] tracking-tight">
-              ALENS
+              {(siteSettings?.siteName || 'ALENS Photography').split(' ')[0]}
             </h1>
             <h2 className="text-[34px] font-bold text-black leading-[0.95] tracking-tight mt-1">
-              Photography
+              {(siteSettings?.siteName || 'ALENS Photography').split(' ').slice(1).join(' ') || 'Photography'}
             </h2>
           </div>
 
