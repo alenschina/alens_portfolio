@@ -123,6 +123,29 @@ src/
 - Middleware protection: `/admin/*` requires auth, `/admin/login` is public
 - Role-based access: ADMIN, SUPER_ADMIN
 
+### CI/CD Pipeline
+
+- **GitHub Actions** (`.github/workflows/ci.yml`):
+  - Runs on push to main/develop and PRs to main
+  - Three sequential jobs: Lint & Format Check, Tests (with coverage), Build
+  - Node.js 20, uses `npm ci` for deterministic installs
+  - Uploads coverage report and build artifacts as artifacts
+
+### Production Deployment
+
+- **PM2** (`ecosystem.config.js`):
+  - App name: `alens_portfolio`
+  - Runs `npm start` in `/var/www/alens_portfolio`
+  - Production database: `file:./prod.db` (NOT dev.db)
+  - Logs at `/var/log/pm2/alens-portfolio-*.log`
+  - Max memory: 1GB, autorestart enabled
+  - Restart delay: 3s, max 5 restarts
+
+- **Build Process** (`copy-assets.js`):
+  - Runs automatically during `npm run build`
+  - Copies Prisma folder to standalone output for production
+  - Images stored in Tencent COS (not local uploads in production)
+
 ### API Design
 RESTful endpoints with Zod validation:
 - `GET/POST/PUT/DELETE /api/navigation` - Navigation CRUD
@@ -204,7 +227,12 @@ Zod schemas in `src/lib/validation.ts` with:
 
 ### Environment Variables (.env)
 ```
+# Development
 DATABASE_URL="file:./dev.db"
+
+# Production (use prod.db, not dev.db)
+DATABASE_URL="file:./prod.db"
+
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-secret-key"
 
