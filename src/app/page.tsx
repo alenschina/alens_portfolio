@@ -167,8 +167,8 @@ export default function Home() {
             </h2>
           </div>
 
-          {/* 导航菜单 */}
-          <nav className="mt-24 flex-shrink-0 font-sans">
+          {/* 导航菜单 - 可滚动区域 */}
+          <nav className="mt-24 flex-1 overflow-y-auto font-sans min-h-0 scrollbar-hide">
             <ul className="space-y-6">
               {navigation.map((item) => {
                 if (item.type === "CATEGORY") {
@@ -279,8 +279,8 @@ export default function Home() {
             </ul>
           </nav>
 
-          {/* 社交媒体链接 */}
-          <div className="mt-auto flex-shrink-0 pt-20">
+          {/* 社交媒体链接和备案信息 - 固定底部 */}
+          <div className="mt-auto flex-shrink-0 pt-8">
             <a
               href="#"
               className="inline-flex items-center text-gray-600 hover:text-black transition-colors"
@@ -304,7 +304,7 @@ export default function Home() {
 
             {/* 备案信息 */}
             {(siteSettings?.beianIcpNumber || siteSettings?.beianGongAnNumber) && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="mt-3 pt-3 border-t border-gray-200">
                 <div className="flex flex-col gap-2">
                   {siteSettings?.beianGongAnNumber && (
                     <span className="text-[10px] text-gray-500">
@@ -313,7 +313,8 @@ export default function Home() {
                   )}
                   {siteSettings?.beianIcpNumber && (
                     <span className="text-[10px] text-gray-500">
-                      {siteSettings.beianIcpNumber}
+                      {siteSettings.beianIcpNumber
+                      }
                     </span>
                   )}
                 </div>
