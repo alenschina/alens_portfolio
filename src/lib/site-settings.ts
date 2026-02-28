@@ -3,11 +3,15 @@ import { prisma } from './prisma'
 export type SiteSettings = {
   siteName: string
   siteDescription: string
+  beianIcpNumber: string
+  beianGongAnNumber: string
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
   siteName: 'Alens Photography',
-  siteDescription: 'Professional photographer specializing in fine art and documentary photography'
+  siteDescription: 'Professional photographer specializing in fine art and documentary photography',
+  beianIcpNumber: '',
+  beianGongAnNumber: ''
 }
 
 /**
@@ -29,7 +33,9 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 
     return {
       siteName: settingsMap.siteName || DEFAULT_SETTINGS.siteName,
-      siteDescription: settingsMap.siteDescription || DEFAULT_SETTINGS.siteDescription
+      siteDescription: settingsMap.siteDescription || DEFAULT_SETTINGS.siteDescription,
+      beianIcpNumber: settingsMap.beianIcpNumber || DEFAULT_SETTINGS.beianIcpNumber,
+      beianGongAnNumber: settingsMap.beianGongAnNumber || DEFAULT_SETTINGS.beianGongAnNumber
     }
   } catch (error) {
     console.error('Error fetching site settings:', error)

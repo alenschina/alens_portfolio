@@ -3,6 +3,8 @@ import useSWR from 'swr'
 export interface SiteSettings {
   siteName: string
   siteDescription: string
+  beianIcpNumber: string
+  beianGongAnNumber: string
 }
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())

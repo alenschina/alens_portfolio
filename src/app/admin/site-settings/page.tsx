@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdminSiteSettings } from '@/hooks/useSiteSettings'
 import { LoadingSpinner } from '@/components/admin/LoadingSpinner'
@@ -11,16 +11,20 @@ export default function SiteSettingsPage() {
 
   const [siteName, setSiteName] = useState('')
   const [siteDescription, setSiteDescription] = useState('')
+  const [beianIcpNumber, setBeianIcpNumber] = useState('')
+  const [beianGongAnNumber, setBeianGongAnNumber] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Initialize form when settings load
-  useState(() => {
+  useEffect(() => {
     if (settings) {
-      setSiteName(settings.siteName)
-      setSiteDescription(settings.siteDescription)
+      setSiteName(settings.siteName || '')
+      setSiteDescription(settings.siteDescription || '')
+      setBeianIcpNumber(settings.beianIcpNumber || '')
+      setBeianGongAnNumber(settings.beianGongAnNumber || '')
     }
-  })
+  }, [settings])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,6 +44,20 @@ export default function SiteSettingsPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: 'siteDescription', value: siteDescription })
+      })
+
+      // Save ICP beian number
+      await fetch('/api/site-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'beianIcpNumber', value: beianIcpNumber })
+      })
+
+      // Save Gong An beian number
+      await fetch('/api/site-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'beianGongAnNumber', value: beianGongAnNumber })
       })
 
       setMessage({ type: 'success', text: 'Settings saved successfully!' })
@@ -67,7 +85,7 @@ export default function SiteSettingsPage() {
           <input
             id="siteName"
             type="text"
-            value={siteName || settings?.siteName || ''}
+            value={siteName}
             onChange={(e) => setSiteName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="My Photography Portfolio"
@@ -83,7 +101,7 @@ export default function SiteSettingsPage() {
           </label>
           <textarea
             id="siteDescription"
-            value={siteDescription || settings?.siteDescription || ''}
+            value={siteDescription}
             onChange={(e) => setSiteDescription(e.target.value)}
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -92,6 +110,46 @@ export default function SiteSettingsPage() {
           <p className="text-sm text-gray-500">
             This will be used for SEO meta description
           </p>
+        </div>
+
+        <div className="border-t border-gray-200 pt-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Filing Information (备案信息)</h2>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="beianIcpNumber" className="block text-sm font-medium text-gray-700">
+                ICP备案号
+              </label>
+              <input
+                id="beianIcpNumber"
+                type="text"
+                value={beianIcpNumber}
+                onChange={(e) => setBeianIcpNumber(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="粤ICP备XXXXXXXX号"
+              />
+              <p className="text-sm text-gray-500">
+                This will be displayed in the footer of the homepage
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="beianGongAnNumber" className="block text-sm font-medium text-gray-700">
+                公安备案号
+              </label>
+              <input
+                id="beianGongAnNumber"
+                type="text"
+                value={beianGongAnNumber}
+                onChange={(e) => setBeianGongAnNumber(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="XXXXXXXXXXXXXXXX号"
+              />
+              <p className="text-sm text-gray-500">
+                Public Security Filing Number
+              </p>
+            </div>
+          </div>
         </div>
 
         {message && (

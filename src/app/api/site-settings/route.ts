@@ -23,16 +23,25 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json()
-    const { key, value } = body as { key: keyof SiteSettings; value: string }
+    const { key, value } = body as { key: string; value: string }
 
-    if (!key || !value) {
+    if (!key || value === undefined) {
       return NextResponse.json(
         { error: 'Missing key or value' },
         { status: 400 }
       )
     }
 
-    await updateSiteSetting(key, value)
+    // Only allow specific keys
+    const allowedKeys: (keyof SiteSettings)[] = ['siteName', 'siteDescription', 'beianIcpNumber', 'beianGongAnNumber']
+    if (!allowedKeys.includes(key as keyof SiteSettings)) {
+      return NextResponse.json(
+        { error: 'Invalid key' },
+        { status: 400 }
+      )
+    }
+
+    await updateSiteSetting(key as keyof SiteSettings, value)
 
     return NextResponse.json({ success: true })
   } catch (error) {

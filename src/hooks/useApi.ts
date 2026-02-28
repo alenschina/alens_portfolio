@@ -178,6 +178,8 @@ export function useContact() {
 export interface SiteSettingsData {
   siteName: string
   siteDescription: string
+  beianIcpNumber: string
+  beianGongAnNumber: string
 }
 
 // Site settings hook

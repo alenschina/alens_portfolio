@@ -301,6 +301,24 @@ export default function Home() {
                 <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
               </svg>
             </a>
+
+            {/* 备案信息 */}
+            {(siteSettings?.beianIcpNumber || siteSettings?.beianGongAnNumber) && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex flex-col gap-2">
+                  {siteSettings?.beianGongAnNumber && (
+                    <span className="text-[10px] text-gray-500">
+                      {siteSettings.beianGongAnNumber}
+                    </span>
+                  )}
+                  {siteSettings?.beianIcpNumber && (
+                    <span className="text-[10px] text-gray-500">
+                      {siteSettings.beianIcpNumber}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 
